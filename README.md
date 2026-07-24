@@ -87,10 +87,13 @@ Test con Jest + React Native Testing Library sui moduli core (repository, utilit
 - **Fase 0** — Scelte architetturali, struttura, modello dati. ✅
 - **Fase 1** — Scaffold, TypeScript, design system + tema chiaro/scuro, i18n, repository locale,
   navigazione base. ✅
-- **Fase 2** — Mappa interattiva, ricerca POI (Google Places), aggiunta tappe, dettaglio tappa
-  (orari/prezzi/affollamento tramite provider). Backend **Laravel** dietro lo stesso repository.
+- **Fase 2** — Mappa interattiva (Leaflet + OpenStreetMap, gratuita), ricerca POI, aggiunta tappe
+  (ricerca o tap sulla mappa), linea-percorso, dettaglio tappa in bottom sheet con stato apertura,
+  affollamento stimato e prezzo crowdsourced. Tre provider dietro interfacce (`src/core/providers`,
+  vedi `docs/DATA_PROVIDERS.md`). ✅
 - **Fase 3** — Timeline con orari, drag & drop, budget tracker, ottimizzazione percorso (TSP).
 - **Fase 4** — Condivisione/export (JSON/QR), rifinitura UI/animazioni, empty/loading states.
-- **Fase 5** — `docs/BACKEND.md` + `ApiItineraryRepository` completo, test estesi sui moduli core.
+- **Fase 5** — Backend **Laravel**: `docs/BACKEND.md` + `ApiItineraryRepository` completo (già
+  predisposto), test estesi sui moduli core.
 
 Dettagli di prodotto in `PRODUCT.md`, di design in `DESIGN.md`.

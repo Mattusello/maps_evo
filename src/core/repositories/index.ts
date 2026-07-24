@@ -7,12 +7,14 @@ import { env } from '../config/env';
 import { ApiItineraryRepository } from './api/ApiItineraryRepository';
 import { LocalAuthRepository } from './local/LocalAuthRepository';
 import { LocalItineraryRepository } from './local/LocalItineraryRepository';
-import type { AuthRepository, ItineraryRepository } from './contracts';
+import { LocalPriceReportRepository } from './local/LocalPriceReportRepository';
+import type { AuthRepository, ItineraryRepository, PriceReportRepository } from './contracts';
 
 export * from './contracts';
 
 let itineraryRepo: ItineraryRepository | null = null;
 let authRepo: AuthRepository | null = null;
+let priceReportRepo: PriceReportRepository | null = null;
 
 export function getItineraryRepository(): ItineraryRepository {
   if (!itineraryRepo) {
@@ -29,4 +31,9 @@ export function getAuthRepository(): AuthRepository {
     authRepo = new LocalAuthRepository();
   }
   return authRepo;
+}
+
+export function getPriceReportRepository(): PriceReportRepository {
+  if (!priceReportRepo) priceReportRepo = new LocalPriceReportRepository();
+  return priceReportRepo;
 }

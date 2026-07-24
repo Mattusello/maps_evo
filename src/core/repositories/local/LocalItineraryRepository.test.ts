@@ -1,3 +1,5 @@
+import { describe, expect, it } from '@jest/globals';
+
 import { LocalItineraryRepository } from './LocalItineraryRepository';
 import { Outbox } from '../../sync/outbox';
 import type { KeyValueStore } from '../../storage/keyValueStore';
