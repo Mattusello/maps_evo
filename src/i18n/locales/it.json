@@ -1,0 +1,99 @@
+{
+  "common": {
+    "appName": "MyMappa",
+    "save": "Salva",
+    "cancel": "Annulla",
+    "delete": "Elimina",
+    "edit": "Modifica",
+    "done": "Fatto",
+    "add": "Aggiungi",
+    "back": "Indietro",
+    "retry": "Riprova",
+    "loading": "Caricamento…",
+    "estimated": "Stimato",
+    "perPerson": "a persona",
+    "today": "Oggi",
+    "comingSoon": "In arrivo"
+  },
+  "phase": {
+    "map": "La mappa interattiva con ricerca POI e aggiunta tappe arriva nella Fase 2.",
+    "timeline": "La timeline con orari e riordino drag & drop arriva nella Fase 3.",
+    "budget": "Il budget tracker con divisione costi arriva nella Fase 3."
+  },
+  "tabs": {
+    "itineraries": "Itinerari",
+    "explore": "Esplora",
+    "settings": "Impostazioni"
+  },
+  "explore": {
+    "comingSoon": "Scoperta di tappe e itinerari in arrivo nelle prossime fasi."
+  },
+  "itineraries": {
+    "title": "I tuoi itinerari",
+    "empty": {
+      "title": "Nessun itinerario, ancora",
+      "body": "Crea il tuo primo viaggio: aggiungi tappe, orari e budget, poi condividilo.",
+      "cta": "Crea itinerario"
+    },
+    "new": {
+      "title": "Nuovo itinerario",
+      "nameLabel": "Nome",
+      "namePlaceholder": "Es. Weekend a Firenze",
+      "descriptionPlaceholder": "Descrizione (facoltativa)",
+      "create": "Crea"
+    },
+    "day": "Giorno {{index}}",
+    "days_one": "{{count}} giorno",
+    "days_other": "{{count}} giorni",
+    "stops_one": "{{count}} tappa",
+    "stops_other": "{{count}} tappe",
+    "count_one": "{{count}} itinerario",
+    "count_other": "{{count}} itinerari"
+  },
+  "stop": {
+    "openNow": "Aperto",
+    "closedNow": "Chiuso",
+    "closesAt": "Chiude alle {{time}}",
+    "opensAt": "Apre alle {{time}}",
+    "closingSoon": "Chiude tra {{minutes}} min",
+    "priceLevel": "Fascia di prezzo",
+    "realPrice": "Prezzo reale",
+    "updatePrice": "Aggiorna prezzo",
+    "crowdLevel": "Affollamento",
+    "book": "Prenota",
+    "addToItinerary": "Aggiungi all'itinerario"
+  },
+  "crowd": {
+    "low": "Poco affollato",
+    "medium": "Affollamento medio",
+    "high": "Molto affollato",
+    "estimatedNote": "Stima basata sulla categoria e sull'orario"
+  },
+  "timeline": {
+    "title": "Timeline",
+    "optimize": "Ottimizza percorso",
+    "reorderHint": "Tieni premuto e trascina per riordinare"
+  },
+  "budget": {
+    "title": "Budget",
+    "currency": "Valuta",
+    "total": "Totale",
+    "perDay": "Al giorno",
+    "split": "Dividi tra",
+    "people_one": "{{count}} persona",
+    "people_other": "{{count}} persone"
+  },
+  "sharing": {
+    "title": "Condividi",
+    "export": "Esporta",
+    "import": "Importa",
+    "collaborators": "Collaboratori"
+  },
+  "settings": {
+    "title": "Impostazioni",
+    "appearance": "Aspetto",
+    "theme": { "system": "Sistema", "light": "Chiaro", "dark": "Scuro" },
+    "language": "Lingua",
+    "about": "Informazioni"
+  }
+}
