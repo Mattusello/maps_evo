@@ -6,6 +6,9 @@ const withVar = (name) => `rgb(var(${name}) / <alpha-value>)`;
 module.exports = {
   content: ['./src/**/*.{js,jsx,ts,tsx}'],
   presets: [require('nativewind/preset')],
+  // Strategia 'class' (non 'media'): permette di forzare il tema chiaro/scuro dalle
+  // Impostazioni tramite colorScheme.set(). Con 'media' il set() manuale lancia un errore.
+  darkMode: 'class',
   theme: {
     extend: {
       colors: {

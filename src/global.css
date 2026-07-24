@@ -31,8 +31,11 @@
     --color-danger-container: 250 223 216;
   }
 
-  @media (prefers-color-scheme: dark) {
-    :root {
+  /*
+   * Tema scuro: strategia 'class'. NativeWind applica la classe `dark` alla radice
+   * (anche quando la preferenza è 'system', seguendo l'OS), attivando queste variabili.
+   */
+  .dark:root {
       --color-background: 11 12 16;
       --color-surface: 21 23 30;
       --color-surface-muted: 31 34 44;
@@ -53,6 +56,5 @@
       --color-warning-container: 56 40 8;
       --color-danger: 255 123 96;
       --color-danger-container: 58 22 14;
-    }
   }
 }
