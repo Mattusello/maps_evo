@@ -49,5 +49,6 @@ di prima classe.
 
 - Marker di mappa e colori-linea per categoria (Fase 2): usare `categoryColors`.
 - Curve/indicatori di affollamento (Fase 2–3): visualizzazione del dato stimato.
-- Motion orchestrata su transizioni sheet e riordino drag & drop (Fase 3–4).
+- Motion orchestrata su transizioni sheet e riordino drag & drop: prima passata fatta in Fase 3
+  (entrata dei fogli, righe che scivolano nel riordino). Da rifinire in Fase 4.
 - Asset di brand reali (icona app, splash): ora placeholder del template, da sostituire.

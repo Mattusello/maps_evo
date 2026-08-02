@@ -1,6 +1,6 @@
-# MyMappa — Documento di Handoff (Fase 1 + Fase 2)
+# MyMappa — Documento di Handoff (Fasi 1 → 3)
 
-Documento per **riprendere il progetto** (Fase 3 e successive) in un secondo momento.
+Documento per **riprendere il progetto** (Fase 4 e successive) in un secondo momento.
 Riassume stato, decisioni, architettura, come far girare/verificare e i prossimi passi.
 
 - **Prodotto:** app mobile (iOS + Android) per creare, organizzare e condividere **itinerari di
@@ -21,11 +21,13 @@ Brief originale completo: [`prompt-claude-code-itinerari.md`](../prompt-claude-c
 | 0 | Scelte architetturali, struttura, modello dati | ✅ |
 | 1 | Scaffold, design system, i18n, repository locale, navigazione base | ✅ |
 | 2 | Mappa OSM, ricerca POI, aggiunta/dettaglio tappa (3 provider) | ✅ |
-| 3 | Timeline + drag & drop, budget, ottimizzazione percorso (TSP) | ⬜ da fare |
-| 4 | Condivisione/export, rifinitura UI/animazioni | ⬜ |
+| 3 | Timeline + drag & drop, budget, ottimizzazione percorso (TSP) | ✅ |
+| 4 | Condivisione/export, rifinitura UI/animazioni | ⬜ da fare |
 | 5 | Backend Laravel (BACKEND.md + ApiItineraryRepository), test estesi | ⬜ |
 
-Verifiche verdi all'ultimo commit: `tsc` pulito, **14 test** verdi, bundle web ok.
+Verifiche verdi all'ultimo commit: `tsc` pulito, **46 test** verdi, bundle web ok.
+Timeline e Budget sono stati provati **nel browser** (riordino, foglio tappa, ottimizzazione,
+inserimento costo): vedi §8.
 
 ---
 
@@ -39,7 +41,10 @@ Verifiche verdi all'ultimo commit: `tsc` pulito, **14 test** verdi, bundle web o
 - **AsyncStorage dietro un layer repository astratto** (SQLite-ready). La UI dipende **solo**
   dai contratti, mai da storage o HTTP.
 - **react-hook-form + zod**, **i18next** (solo `it`, struttura multilingua pronta),
-  **@gorhom/bottom-sheet**, **react-native-reanimated**, **lucide-react-native**.
+  **react-native-reanimated**, **lucide-react-native**.
+- **Fogli (bottom sheet):** sempre via il componente `ui/components/Sheet`. Nativo =
+  **@gorhom/bottom-sheet**; web = `Sheet.web.tsx` fatto in casa, perché il modale di gorhom
+  con Reanimated 4 su react-native-web viene montato ma **non compare** (vedi §7).
 - **Mappa/POI:** stack **gratuito OpenStreetMap** (vedi §5 e `DATA_PROVIDERS.md`).
 
 ---
@@ -70,9 +75,13 @@ src/
       new.tsx                  # form nuovo itinerario (react-hook-form + zod)
       [id]/index.tsx           # overview itinerario (giorni, azioni)
       [id]/map.tsx             # MAPPA (Fase 2)
-      [id]/timeline.tsx        # placeholder → Fase 3
-      [id]/budget.tsx          # placeholder → Fase 3
+      [id]/timeline.tsx        # TIMELINE (Fase 3)
+      [id]/budget.tsx          # BUDGET (Fase 3)
   core/
+    geo/distance.ts            # haversine + stima tempi di spostamento (Fase 3)
+    tsp/optimizeRoute.ts       # ottimizzazione percorso: nearest-neighbor + 2-opt (Fase 3)
+    schedule/                  # daySchedule (orari) + smartSchedule (meno coda) (Fase 3)
+    budget/budget.ts           # totali per giorno/viaggio/persona (Fase 3)
     models/                    # entità + schema zod (FONTE DI VERITÀ dei dati)
     repositories/
       contracts/               # ItineraryRepository, AuthRepository, PriceReportRepository
@@ -91,10 +100,12 @@ src/
     itineraries/components/    # RouteStrip (motivo firma), ItineraryCard
     map/                       # MapCanvas(.web), leafletHtml, mapPayload, PoiSearchBar
     stops/                     # StopDetailSheet, CrowdBars, openingHours, category
+    timeline/                  # DayTimeline, TimelineRow, StopScheduleSheet (Fase 3)
+    budget/                    # BudgetSummary, CostSheet (Fase 3)
   ui/
     theme/                     # palette, tokens, ThemeProvider (useTheme/useThemeColors)
     components/                # Text, Button, Card, Badge, Chip, Screen, EmptyState, Fab,
-                               # Skeleton, TextField
+                               # Skeleton, TextField, Sheet(.web), DraggableList
   i18n/                        # config + locales/it.json (NIENTE stringhe hardcoded)
 docs/                          # DATA_PROVIDERS.md, HANDOFF.md (questo file)
 ```
@@ -108,7 +119,12 @@ docs/                          # DATA_PROVIDERS.md, HANDOFF.md (questo file)
 - **Design a token:** niente colori/misure hardcoded; usa `useTheme()` (JS) o le classi NativeWind
   (`bg-surface`, `text-primary`, …). Tipografia solo via `<Text variant>`.
 - **i18n:** ogni stringa passa da `t('...')` con chiave in `src/i18n/locales/it.json`.
-- **Dato onesto:** affollamento sempre "stimato"; prezzo con freschezza.
+- **Dato onesto:** affollamento sempre "stimato"; prezzo con freschezza; orari e distanze
+  sono stime dichiarate (linea d'aria, velocità medie), mai spacciate per dati di routing.
+- **Calcolo fuori dalla UI:** orari, budget e ottimizzazione stanno in `core/` come funzioni
+  pure e testate; le schermate presentano soltanto.
+- **Costi a persona:** `Stop.cost` è il costo **per persona** (come i `PriceReport`); il totale
+  di gruppo è `costo × partySize`. Non mescolare le due letture.
 
 ---
 
@@ -153,6 +169,13 @@ soft-delete (`deletedAt`).
 - **Perché la mappa è in WebView/iframe (Leaflet) e non MapLibre nativo:** i moduli mappa nativi
   non girano su react-native-web; la WebView/iframe permette di vederla anche sul web. È dietro
   `MapCanvas`, quindi sostituibile in futuro.
+- **Bottom sheet sul web:** `@gorhom/bottom-sheet` (v5) con **Reanimated 4** su react-native-web
+  monta il modale ma non lo mostra: `present()` non produce nulla in pagina. Per questo esiste
+  `ui/components/Sheet` con variante `.web.tsx`. **Non usare `BottomSheetModal` direttamente**:
+  passa sempre da `Sheet`, altrimenti la feature sparisce sul web.
+- **Animazioni Reanimated sul web:** le molle (`withSpring`) possono congelarsi a metà corsa.
+  In `DraggableList` si usa `withTiming` e la posizione di riposo viene sempre riallineata da
+  React (`initialIndex`), così una animazione interrotta non lascia la lista disallineata.
 - Il PC di sviluppo **non ha Java né Android SDK** (build Android locale non immediata).
 
 ---
@@ -172,29 +195,30 @@ geocoding). `StopDetailSheet` (bottom sheet) con stato apertura, affollamento st
 orario, prezzo crowdsourced con freschezza e voto. Tre provider dietro interfacce. `PriceReportRepository`.
 `docs/DATA_PROVIDERS.md`. Test: crowd, orari, prezzi, repository.
 
+**Fase 3** — **Timeline**: per ogni giorno finestra oraria, totali visite/spostamenti, fermate con
+orario di arrivo, permanenza, tratta di spostamento (a piedi/motorizzata, minuti + distanza),
+affollamento stimato all'ora di arrivo, conflitti d'orario segnalati. **Riordino** per
+trascinamento (`DraggableList` fatto in casa, funziona anche sul web) con alternativa accessibile
+"Sposta su/giù" nel foglio della tappa. **Ottimizzazione percorso** (nearest-neighbor + 2-opt) con
+esito dichiarato ("più corto di X" / "già il più breve"). **Smart scheduling**: proposte di orario
+meno affollato, applicabili con un tocco. **Budget**: totale del viaggio, quota a persona, stepper
+partecipanti, dettaglio per giorno e per tappa, costo modificabile con proposta del prezzo
+crowdsourced; tappe senza costo e valute diverse dichiarate. Nuovo `ui/components/Sheet(.web)`
+(usato anche dal `StopDetailSheet` della Fase 2, che sul web non si apriva). Test: geo, TSP,
+orari/schedule, smart scheduling, budget (46 in totale).
+
 ---
 
 ## 9. Prossimi passi
-
-### Fase 3 — Timeline, drag & drop, budget, TSP
-- **Timeline** (`src/features/timeline`, sostituire `app/itinerary/[id]/timeline.tsx`): per ogni
-  giorno, tappe ordinate con **orari pianificati** (`plannedArrival`) e **durata**
-  (`plannedDurationMin`) → editabili via `updateStop`. Mostrare gli spostamenti tra tappe.
-- **Drag & drop** per riordinare: già disponibile `reorderStops(dayId, orderedIds)`. Valutare
-  `react-native-draggable-flatlist` (da installare) — verificare la resa **sul web**.
-- **Budget** (`src/features/budget`, sostituire `app/itinerary/[id]/budget.tsx`): somma
-  `Stop.cost` (+ eventuale prezzo crowdsourced) per **giorno**, **totale** e **per persona**
-  (`itinerary.partySize`). Split costi tra partecipanti (§7 del brief). Valuta = `itinerary.currency`;
-  usare `formatMoney` in `core/utils/format.ts`.
-- **Ottimizzazione percorso (TSP)** (creare `src/core/tsp`): euristica **nearest-neighbor + 2-opt**
-  sulle coordinate delle tappe del giorno; output → `reorderStops`. Commentare l'euristica.
-  Idea §7: *smart scheduling* incrociando orari + affollamento (`CrowdProvider`).
 
 ### Fase 4 — Condivisione + rifinitura
 - Export/import: `exportItinerary`/`importItinerary` già nel repository. Aggiungere UI + **JSON/QR**
   (serve una lib QR + `expo-clipboard`/`expo-sharing`). Gestione lista collaboratori a livello modello.
 - Rifinitura UI/animazioni (usare **/impeccable**: `polish`, `animate`), empty/loading states,
   e il **finish-review** di impeccable rimandato dalla Fase 1.
+- **Da verificare** (emerso provando la Fase 3 nel browser): sulla schermata Mappa i marker delle
+  tappe non si vedevano con l'itinerario di prova — controllare centratura/fit dei bounds in
+  `MapCanvas.web`. Da sistemare insieme alla rifinitura.
 
 ### Fase 5 — Backend Laravel
 - Scrivere `docs/BACKEND.md` (endpoint REST, payload JSON, auth **Sanctum**). Gli endpoint attesi

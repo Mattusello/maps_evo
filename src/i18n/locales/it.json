@@ -15,11 +15,6 @@
     "today": "Oggi",
     "comingSoon": "In arrivo"
   },
-  "phase": {
-    "map": "La mappa interattiva con ricerca POI e aggiunta tappe arriva nella Fase 2.",
-    "timeline": "La timeline con orari e riordino drag & drop arriva nella Fase 3.",
-    "budget": "Il budget tracker con divisione costi arriva nella Fase 3."
-  },
   "tabs": {
     "itineraries": "Itinerari",
     "explore": "Esplora",
@@ -100,16 +95,67 @@
   "timeline": {
     "title": "Timeline",
     "optimize": "Ottimizza percorso",
-    "reorderHint": "Tieni premuto e trascina per riordinare"
+    "optimizing": "Ottimizzo…",
+    "optimizeSaved": "Percorso più corto di {{distance}}",
+    "optimizeAlready": "Il percorso è già il più breve",
+    "reorderHint": "Trascina la maniglia per riordinare le tappe",
+    "dragHandle": "Riordina la tappa {{title}}",
+    "empty": {
+      "title": "Giornata ancora libera",
+      "body": "Aggiungi le tappe dalla mappa: qui compaiono orari, spostamenti e affollamento.",
+      "cta": "Apri la mappa"
+    },
+    "summary": "{{visit}} di visite · {{travel}} di spostamenti",
+    "range": "{{start}} – {{end}}",
+    "travel": {
+      "walk": "{{minutes}} min a piedi",
+      "transit": "{{minutes}} min di spostamento"
+    },
+    "start": "Inizio giornata",
+    "conflict": "Non ci arrivi in tempo",
+    "pinned": "Orario fissato",
+    "durationEstimated": "Durata tipica",
+    "editTitle": "Orari e costo",
+    "arrival": "Orario di arrivo",
+    "arrivalPlaceholder": "HH:MM",
+    "arrivalInvalid": "Usa il formato HH:MM",
+    "arrivalFree": "Fai scorrere",
+    "arrivalFreeHint": "Senza orario fissato la tappa segue quella precedente.",
+    "duration": "Permanenza",
+    "cost": "Costo a persona",
+    "costPlaceholder": "Es. 12,50",
+    "costInvalid": "Inserisci un importo valido",
+    "moveUp": "Sposta su",
+    "moveDown": "Sposta giù",
+    "suggestions": {
+      "title": "Meno coda",
+      "body": "{{title}}: alle {{hour}} l'affollamento stimato scende a {{level}}.",
+      "apply": "Sposta alle {{hour}}"
+    }
   },
   "budget": {
     "title": "Budget",
     "currency": "Valuta",
     "total": "Totale",
+    "totalFor": "Totale per {{people}}",
     "perDay": "Al giorno",
+    "perPerson": "A persona",
     "split": "Dividi tra",
     "people_one": "{{count}} persona",
-    "people_other": "{{count}} persone"
+    "people_other": "{{count}} persone",
+    "hint": "I costi si inseriscono a persona: il totale li moltiplica per i partecipanti.",
+    "noCost": "Nessun costo",
+    "addCost": "Aggiungi",
+    "fromCrowd": "Dalla community",
+    "missing_one": "{{count}} tappa senza costo",
+    "missing_other": "{{count}} tappe senza costo",
+    "foreign_one": "{{count}} costo in un'altra valuta, escluso dal totale",
+    "foreign_other": "{{count}} costi in un'altra valuta, esclusi dal totale",
+    "empty": {
+      "title": "Ancora nessun costo",
+      "body": "Aggiungi le tappe e il loro costo: qui vedrai il totale del viaggio e la quota di ciascuno.",
+      "cta": "Apri la mappa"
+    }
   },
   "sharing": {
     "title": "Condividi",
