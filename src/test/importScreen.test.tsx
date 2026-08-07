@@ -3,14 +3,18 @@
  * leggo l'anteprima, confermo. Copre i punti dove è facile sbagliare: un codice illeggibile
  * deve dire perché, e la conferma deve scrivere passando dal contesto (mai dritta al
  * repository).
+ *
+ * Sta in `src/test/` e non accanto alla schermata perché expo-router impacchetta **ogni**
+ * file dentro `src/app/`: un test lì dentro diventerebbe una rotta e farebbe fallire il
+ * bundle (importa `@jest/globals`).
  */
 import { beforeEach, describe, expect, it, jest } from '@jest/globals';
 import { fireEvent, screen } from '@testing-library/react-native';
 
-import ImportScreen from './import';
+import ImportScreen from '@/app/import';
 import type { Itinerary, ItineraryWithDetails } from '@/core/models';
 import { encodeShareCode } from '@/core/sharing/shareCode';
-import { renderWithProviders } from '@/test/renderWithProviders';
+import { renderWithProviders } from './renderWithProviders';
 
 const ISO = '2026-08-01T10:00:00.000Z';
 

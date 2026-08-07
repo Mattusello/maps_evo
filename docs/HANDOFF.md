@@ -1,6 +1,6 @@
-# MyMappa — Documento di Handoff (Fasi 1 → 3)
+# MyMappa — Documento di Handoff (Fasi 1 → 4)
 
-Documento per **riprendere il progetto** (Fase 4 e successive) in un secondo momento.
+Documento per **riprendere il progetto** (Fase 5 e successive) in un secondo momento.
 Riassume stato, decisioni, architettura, come far girare/verificare e i prossimi passi.
 
 - **Prodotto:** app mobile (iOS + Android) per creare, organizzare e condividere **itinerari di
@@ -22,12 +22,15 @@ Brief originale completo: [`prompt-claude-code-itinerari.md`](../prompt-claude-c
 | 1 | Scaffold, design system, i18n, repository locale, navigazione base | ✅ |
 | 2 | Mappa OSM, ricerca POI, aggiunta/dettaglio tappa (3 provider) | ✅ |
 | 3 | Timeline + drag & drop, budget, ottimizzazione percorso (TSP) | ✅ |
-| 4 | Condivisione/export, rifinitura UI/animazioni | ⬜ da fare |
+| 4 | Condivisione (QR/link/codice), import, collaboratori, rifinitura | ✅ |
 | 5 | Backend Laravel (BACKEND.md + ApiItineraryRepository), test estesi | ⬜ |
 
-Verifiche verdi all'ultimo commit: `tsc` pulito, **46 test** verdi, bundle web ok.
-Timeline e Budget sono stati provati **nel browser** (riordino, foglio tappa, ottimizzazione,
-inserimento costo): vedi §8.
+Verifiche verdi all'ultimo commit: `tsc` pulito, **85 test** verdi, bundle web ok, detector
+di `/impeccable` pulito.
+
+⚠️ **La Fase 4 non è ancora stata guardata nel browser da una persona**: durante lo sviluppo
+l'estensione Chrome non era collegata, quindi la verifica visiva è rimasta all'utente. Cosa
+provare per prima cosa: §10.
 
 ---
 
@@ -53,11 +56,19 @@ inserimento costo): vedi §8.
 
 ```bash
 npm install
-npm run web        # ANTEPRIMA PRINCIPALE (localhost:8081) — vedi §7 sul perché
-npm run typecheck  # tsc --noEmit
-npm test           # Jest (14 test)
-npm start          # dev server (QR) per device — richiede un dev build, vedi §7
+npm run web           # ANTEPRIMA PRINCIPALE (localhost:8081) — vedi §7 sul perché
+npm run typecheck     # tsc --noEmit
+npm test              # Jest (85 test)
+npm run assets:brand  # rigenera icona/splash/favicon dal motivo della linea-percorso
+npm start             # dev server (QR) per device — richiede un dev build, vedi §7
 ```
+
+**Test di componente** (introdotti in Fase 4, vedi `src/app/import.test.tsx`): si montano con
+`renderWithProviders` (`src/test/`), che porta tema, safe-area e i18n. Attenzione: in
+@testing-library/react-native 14 **`render` e `fireEvent` sono asincroni** e vanno attesi con
+`await`, altrimenti gli aggiornamenti di stato non risultano applicati. La configurazione
+necessaria sta in `jest.config.js` (resolver di `react-native-worklets`, mapping di
+`lucide-react-native` sulla build CJS) e in `jest.setup.js` (`IS_REACT_ACT_ENVIRONMENT`).
 
 Chiavi/API: nessuna richiesta in Fase 1–2 (stack OSM gratuito). Vedi `.env.example` per le
 variabili future (Google, backend).
@@ -71,13 +82,15 @@ src/
   app/                         # rotte expo-router
     _layout.tsx                # provider globali + font + tema + gesture/bottom-sheet root
     (tabs)/                    # index (lista itinerari), explore, settings
+    import.tsx                 # IMPORTA itinerario ricevuto (Fase 4) + bersaglio deep link
     itinerary/
       new.tsx                  # form nuovo itinerario (react-hook-form + zod)
-      [id]/index.tsx           # overview itinerario (giorni, azioni)
+      [id]/index.tsx           # overview itinerario (giorni, azioni, condividi)
       [id]/map.tsx             # MAPPA (Fase 2)
       [id]/timeline.tsx        # TIMELINE (Fase 3)
       [id]/budget.tsx          # BUDGET (Fase 3)
   core/
+    sharing/                   # shareCode (formato + codifica) + shareLink (Fase 4)
     geo/distance.ts            # haversine + stima tempi di spostamento (Fase 3)
     tsp/optimizeRoute.ts       # ottimizzazione percorso: nearest-neighbor + 2-opt (Fase 3)
     schedule/                  # daySchedule (orari) + smartSchedule (meno coda) (Fase 3)
@@ -91,6 +104,7 @@ src/
     providers/                 # POI / prezzi / affollamento dietro interfacce (§5)
       contracts/  poi/  crowd/  price/  index.ts
     storage/keyValueStore.ts   # astrazione AsyncStorage (→ SQLite in futuro)
+    utils/base64.ts            # base64url UTF-8 scritto a mano (Hermes non ha btoa)
     sync/outbox.ts             # coda mutazioni per sync futuro
     api/apiClient.ts           # client HTTP centralizzato (token/errori) per Laravel
     config/env.ts              # lettura EXPO_PUBLIC_*
@@ -102,8 +116,12 @@ src/
     stops/                     # StopDetailSheet, CrowdBars, openingHours, category
     timeline/                  # DayTimeline, TimelineRow, StopScheduleSheet (Fase 3)
     budget/                    # BudgetSummary, CostSheet (Fase 3)
+    sharing/                   # ShareSheet (QR/link/codice), CollaboratorsSheet,
+                               # shareActions (appunti + foglio di sistema) (Fase 4)
+  test/                        # renderWithProviders per i test di componente (Fase 4)
+  types/                       # dichiarazioni locali (qrcode, usato solo nei test)
   ui/
-    theme/                     # palette, tokens, ThemeProvider (useTheme/useThemeColors)
+    theme/                     # palette, tokens, motion (useReducedMotion), ThemeProvider
     components/                # Text, Button, Card, Badge, Chip, Screen, EmptyState, Fab,
                                # Skeleton, TextField, Sheet(.web), DraggableList
   i18n/                        # config + locales/it.json (NIENTE stringhe hardcoded)
@@ -125,6 +143,12 @@ docs/                          # DATA_PROVIDERS.md, HANDOFF.md (questo file)
   pure e testate; le schermate presentano soltanto.
 - **Costi a persona:** `Stop.cost` è il costo **per persona** (come i `PriceReport`); il totale
   di gruppo è `costo × partySize`. Non mescolare le due letture.
+- **Condivisione = copia.** Un itinerario ricevuto diventa una **copia locale** con id nuovi:
+  non è un documento condiviso finché non c'è il backend. La UI lo dichiara; non promettere
+  sincronizzazione. Il formato del codice è versionato (`SHARE_CODE_VERSION`): un codice più
+  recente viene **rifiutato con un motivo**, mai letto a metà. Se si aggiunge una categoria o
+  una valuta al modello, va aggiunta **in coda** a `SHARED_CATEGORIES`/`SHARED_CURRENCIES`
+  (l'ordine è parte del protocollo; un test lo verifica).
 
 ---
 
@@ -207,18 +231,35 @@ crowdsourced; tappe senza costo e valute diverse dichiarate. Nuovo `ui/component
 (usato anche dal `StopDetailSheet` della Fase 2, che sul web non si apriva). Test: geo, TSP,
 orari/schedule, smart scheduling, budget (46 in totale).
 
+**Fase 4** — **Condivisione**: un itinerario esce come **QR**, **link profondo**
+(`mymappa://import?c=…`) o **codice** testuale, più il JSON completo come backup. Il formato
+del codice è compatto e versionato: tappe come tuple posizionali, categoria e valuta come
+indici, coordinate come scarti interi da un'origine comune — così un viaggio di 3 giorni ×
+5 tappe **sta davvero in un QR leggibile** (col formato esteso serviva un QR di versione 31,
+inquadrabile solo in teoria). La soglia `QR_MAX_CHARS` è tarata sulla capienza reale e
+verificata contro l'encoder vero; oltre la soglia la UI dice di usare il link invece di
+disegnare un reticolo illeggibile. **Import** (rotta `/import`, anche bersaglio del deep
+link): accetta link, codice o JSON, mostra sempre **un'anteprima** prima di scrivere e
+distingue "codice illeggibile" da "formato più recente dell'app". **Collaboratori** a livello
+di modello con ruoli. **Rifinitura su tutta l'app** (il finish-review rimandato dalla Fase 1):
+contrasto del testo piccolo portato sopra 4.5:1 in entrambi i temi, colori-categoria sdoppiati
+per tema, focus da tastiera visibile sul web, ombre reali sul web, stati di errore e testi
+fuorvianti corretti, tesi di motion scritta e rispetto di *Riduci movimento*. **Marchio
+provvisorio** generato da script dal motivo della linea-percorso. Corretto il difetto noto dei
+marker della mappa (closure vecchia nel canvas web). Test: base64, formato di condivisione,
+capienza QR, export/import del repository, flusso di import a livello di UI (85 in totale).
+
 ---
 
 ## 9. Prossimi passi
 
-### Fase 4 — Condivisione + rifinitura
-- Export/import: `exportItinerary`/`importItinerary` già nel repository. Aggiungere UI + **JSON/QR**
-  (serve una lib QR + `expo-clipboard`/`expo-sharing`). Gestione lista collaboratori a livello modello.
-- Rifinitura UI/animazioni (usare **/impeccable**: `polish`, `animate`), empty/loading states,
-  e il **finish-review** di impeccable rimandato dalla Fase 1.
-- **Da verificare** (emerso provando la Fase 3 nel browser): sulla schermata Mappa i marker delle
-  tappe non si vedevano con l'itinerario di prova — controllare centratura/fit dei bounds in
-  `MapCanvas.web`. Da sistemare insieme alla rifinitura.
+### Rimasto indietro dalla Fase 4 (piccolo)
+- **Icona e splash sono un marchio provvisorio** generato da script: coerente col mondo
+  visivo, ma non un logo disegnato. Da sostituire con l'asset vero.
+- **Esplora** è ancora un segnaposto dichiarato: la superficie va progettata quando serve.
+- **Hover sul web** non implementato di proposito (app native-first, web = superficie di
+  validazione). Da progettare solo se il web diventa un target di spedizione.
+- La condivisione produce **copie**: la collaborazione vera dipende dalla Fase 5.
 
 ### Fase 5 — Backend Laravel
 - Scrivere `docs/BACKEND.md` (endpoint REST, payload JSON, auth **Sanctum**). Gli endpoint attesi
@@ -234,3 +275,15 @@ orari/schedule, smart scheduling, budget (46 in totale).
 3. Scegliere la fase, implementarla **feature per feature restando verificabile sul web**,
    committare a step logici, poi fermarsi per conferma.
 4. Per il design usare la skill **/impeccable** (mondo visivo già definito in `DESIGN.md`).
+
+### Cosa provare per primo nel browser (Fase 4, mai vista da una persona)
+
+1. Apri un itinerario con qualche tappa → icona **Condividi** in alto a destra: il QR deve
+   comparire (arrivo animato) e i pulsanti copia devono dare conferma.
+2. Copia il link e aprilo in una scheda nuova: deve arrivare su `/import` con **l'anteprima**
+   dell'itinerario, e "Aggiungi ai miei itinerari" deve creare una copia.
+3. Incolla un testo a caso nel campo di import: deve spiegare il perché, non fallire in
+   silenzio.
+4. Schermata **Mappa**: i marker delle tappe ora devono comparire (era il difetto noto della
+   Fase 3).
+5. Passa a tema scuro dalle Impostazioni e ricontrolla foglio Condividi, timeline e budget.
