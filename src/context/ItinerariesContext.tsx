@@ -14,6 +14,7 @@ import {
 
 import { getItineraryRepository } from '../core/repositories';
 import type { CreateItineraryInput, Itinerary } from '../core/models';
+import { sharedToItineraryDetails, type SharedItinerary } from '../core/sharing/shareCode';
 import { useAuth } from './AuthContext';
 
 type State = {
@@ -52,6 +53,8 @@ type ItinerariesContextValue = State & {
   refresh: () => Promise<void>;
   createItinerary: (input: CreateItineraryInput) => Promise<Itinerary>;
   deleteItinerary: (id: string) => Promise<void>;
+  /** Aggiunge alla lista un itinerario ricevuto (codice, link o QR) come copia locale. */
+  importShared: (shared: SharedItinerary) => Promise<Itinerary>;
 };
 
 const ItinerariesContext = createContext<ItinerariesContextValue | null>(null);
@@ -92,9 +95,21 @@ export function ItinerariesProvider({ children }: { children: ReactNode }) {
     [repo]
   );
 
+  const importShared = useCallback(
+    async (shared: SharedItinerary) => {
+      const ownerId = user?.id ?? 'local';
+      // La scrittura passa sempre dal repository (outbox + syncStatus): qui si traduce
+      // soltanto la forma compatta nell'aggregato che il repository sa importare.
+      const item = await repo.importItinerary(sharedToItineraryDetails(shared, ownerId), ownerId);
+      dispatch({ type: 'upsert', item });
+      return item;
+    },
+    [repo, user]
+  );
+
   const value = useMemo<ItinerariesContextValue>(
-    () => ({ ...state, refresh, createItinerary, deleteItinerary }),
-    [state, refresh, createItinerary, deleteItinerary]
+    () => ({ ...state, refresh, createItinerary, deleteItinerary, importShared }),
+    [state, refresh, createItinerary, deleteItinerary, importShared]
   );
 
   return <ItinerariesContext.Provider value={value}>{children}</ItinerariesContext.Provider>;

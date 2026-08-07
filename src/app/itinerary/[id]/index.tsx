@@ -1,23 +1,29 @@
 import { useFocusEffect, useLocalSearchParams, useRouter } from 'expo-router';
-import { ArrowLeft, CalendarPlus, Map, PiggyBank, Clock } from 'lucide-react-native';
+import { ArrowLeft, CalendarPlus, Map, PiggyBank, Clock, Share2, Users } from 'lucide-react-native';
 import { useCallback, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Pressable, ScrollView, StyleSheet, View } from 'react-native';
 
+import { useAuth } from '@/context/AuthContext';
 import { getItineraryRepository } from '@/core/repositories';
-import type { ItineraryWithDetails } from '@/core/models';
+import type { Collaborator, ItineraryWithDetails } from '@/core/models';
+import { CollaboratorsSheet } from '@/features/sharing/CollaboratorsSheet';
+import { ShareSheet } from '@/features/sharing/ShareSheet';
 import { Badge, Button, Card, Screen, Skeleton, Text } from '@/ui/components';
-import { spacing, useTheme } from '@/ui/theme';
+import { minTapTarget, spacing, useTheme } from '@/ui/theme';
 
 export default function ItineraryDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const { t } = useTranslation();
   const router = useRouter();
   const { colors } = useTheme();
+  const { user } = useAuth();
   const repo = useMemo(() => getItineraryRepository(), []);
 
   const [detail, setDetail] = useState<ItineraryWithDetails | null>(null);
   const [loading, setLoading] = useState(true);
+  const [sharing, setSharing] = useState(false);
+  const [editingCollaborators, setEditingCollaborators] = useState(false);
 
   const load = useCallback(async () => {
     if (!id) return;
@@ -38,14 +44,46 @@ export default function ItineraryDetailScreen() {
     await load();
   };
 
+  /** La lista collaboratori vive sull'itinerario: si salva come qualsiasi altro campo. */
+  const saveCollaborators = async (collaborators: Collaborator[]) => {
+    if (!id) return;
+    await repo.update(id, { collaborators });
+    await load();
+  };
+
   const stopCount = detail?.days.reduce((n, d) => n + d.stops.length, 0) ?? 0;
 
   return (
     <Screen edges={['top']}>
       <View style={styles.topbar}>
-        <Pressable accessibilityRole="button" accessibilityLabel={t('common.back')} onPress={() => router.back()} hitSlop={10}>
+        <Pressable
+          accessibilityRole="button"
+          accessibilityLabel={t('common.back')}
+          onPress={() => router.back()}
+          hitSlop={10}
+          style={[styles.iconBtn, styles.iconBtnEdge]}>
           <ArrowLeft color={colors.text} size={24} />
         </Pressable>
+        {detail ? (
+          <View style={styles.topActions}>
+            <Pressable
+              accessibilityRole="button"
+              accessibilityLabel={t('sharing.collaborators')}
+              onPress={() => setEditingCollaborators(true)}
+              hitSlop={10}
+              style={styles.iconBtn}>
+              <Users color={colors.text} size={22} />
+            </Pressable>
+            <Pressable
+              accessibilityRole="button"
+              accessibilityLabel={t('sharing.title')}
+              onPress={() => setSharing(true)}
+              hitSlop={10}
+              style={styles.iconBtn}>
+              <Share2 color={colors.text} size={22} />
+            </Pressable>
+          </View>
+        ) : null}
       </View>
 
       <ScrollView contentContainerStyle={styles.content}>
@@ -71,6 +109,12 @@ export default function ItineraryDetailScreen() {
                 <Badge tone="primary" dot label={t('itineraries.days', { count: detail.days.length })} />
                 <Badge label={t('itineraries.stops', { count: stopCount })} />
                 <Badge label={detail.currency} />
+                {detail.collaborators.length > 1 ? (
+                  <Badge
+                    icon={<Users color={colors.textSecondary} size={12} />}
+                    label={t('sharing.collaboratorsCount', { count: detail.collaborators.length })}
+                  />
+                ) : null}
               </View>
             </View>
 
@@ -125,6 +169,15 @@ export default function ItineraryDetailScreen() {
           </>
         )}
       </ScrollView>
+
+      <ShareSheet detail={detail} open={sharing} onDismiss={() => setSharing(false)} />
+      <CollaboratorsSheet
+        open={editingCollaborators}
+        onDismiss={() => setEditingCollaborators(false)}
+        collaborators={detail?.collaborators ?? []}
+        currentUserId={user?.id ?? 'local'}
+        onChange={saveCollaborators}
+      />
     </Screen>
   );
 }
@@ -151,7 +204,22 @@ function ActionTile({
 }
 
 const styles = StyleSheet.create({
-  topbar: { paddingHorizontal: spacing.lg, paddingVertical: spacing.sm },
+  topbar: {
+    paddingHorizontal: spacing.lg,
+    paddingVertical: spacing.sm,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+  },
+  topActions: { flexDirection: 'row', gap: spacing.xs, marginRight: -spacing.md },
+  // Tap target pieno (48) senza perdere l'allineamento ottico col contenuto sotto.
+  iconBtn: {
+    width: minTapTarget,
+    height: minTapTarget,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  iconBtnEdge: { marginLeft: -spacing.md },
   content: { padding: spacing.lg, gap: spacing.xl, paddingBottom: spacing['4xl'] },
   head: { gap: spacing.sm },
   badges: { flexDirection: 'row', gap: spacing.sm, flexWrap: 'wrap', marginTop: spacing.xs },

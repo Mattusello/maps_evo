@@ -50,6 +50,8 @@ function RootNavigator() {
         <Stack.Screen name="(tabs)" />
         <Stack.Screen name="itinerary/new" options={{ presentation: 'modal' }} />
         <Stack.Screen name="itinerary/[id]/index" />
+        {/* Bersaglio del link profondo di condivisione (mymappa://import?c=…). */}
+        <Stack.Screen name="import" options={{ presentation: 'modal' }} />
       </Stack>
     </>
   );
