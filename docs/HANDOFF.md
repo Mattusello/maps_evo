@@ -76,8 +76,8 @@ npm start             # dev server (QR) per device — richiede un dev build, ve
 necessaria sta in `jest.config.js` (resolver di `react-native-worklets`, mapping di
 `lucide-react-native` sulla build CJS) e in `jest.setup.js` (`IS_REACT_ACT_ENVIRONMENT`).
 
-Chiavi/API: nessuna richiesta per usare l app (stack OSM gratuito). Il backend si attiva con
-`EXPO_PUBLIC_API_URL` + `EXPO_PUBLIC_USE_API` (vedi `.env.example`); senza, l app resta locale
+Chiavi/API: nessuna richiesta per usare l’app (stack OSM gratuito). Il backend si attiva con
+`EXPO_PUBLIC_API_URL` + `EXPO_PUBLIC_USE_API` (vedi `.env.example`); senza, l’app resta locale
 e lo dichiara nelle Impostazioni.
 
 ---
@@ -105,7 +105,7 @@ src/
     models/                    # entità + schema zod (FONTE DI VERITÀ dei dati)
     repositories/
       contracts/               # ItineraryRepository, AuthRepository, PriceReportRepository
-      local/                   # impl. Fase 1/2 (AsyncStorage + outbox)
+      local/                   # AsyncStorage + outbox; LocalCollections (condivise col sync)
       api/                     # ApiItineraryRepository (solo online) + ApiAuthRepository
       index.ts                 # factory: sceglie impl. da env (getItineraryRepository, …)
     providers/                 # POI / prezzi / affollamento dietro interfacce (§5)
@@ -139,7 +139,8 @@ docs/                          # DATA_PROVIDERS.md, BACKEND.md (contratto server
 ### Pattern chiave da rispettare
 - **Repository astratto:** importa sempre da `@/core/repositories` (`getItineraryRepository()`,
   `getPriceReportRepository()`), mai le classi `Local*`/`Api*`. Ogni mutazione locale scrive
-  anche nell'**outbox** e marca l'entità `syncStatus: 'pending'` (per il sync di Fase 5).
+  anche nell'**outbox** e marca l'entità `syncStatus: 'pending'`: è ciò che il SyncEngine
+  rigioca verso il server.
 - **Provider astratti:** importa da `@/core/providers` (`getPoiProvider/getCrowdProvider/
   getPriceProvider`). Sostituire una fonte = nuova classe dietro l'interfaccia, UI invariata.
 - **Design a token:** niente colori/misure hardcoded; usa `useTheme()` (JS) o le classi NativeWind
@@ -184,7 +185,7 @@ Google resta un'opzione "drop-in" futura (un `GooglePoiProvider` dietro la stess
 
 ---
 
-## 6. Modello dati (dove agganciare le prossime fasi)
+## 6. Modello dati
 
 `src/core/models` (zod). Entità: **Itinerary** (title, days[], ownerId, collaborators[], currency,
 partySize, syncStatus…), **Day** (orderedStopIds[]), **Stop** (title, category, location,
@@ -192,9 +193,9 @@ partySize, syncStatus…), **Day** (orderedStopIds[]), **Stop** (title, category
 **CrowdEstimate**, **OutboxEntry**. Tutte con `id` UUID lato client, timestamps, `syncStatus`,
 soft-delete (`deletedAt`).
 
-**Metodi repository già pronti** utili alle fasi 3–4 (in `ItineraryRepository`):
+**Metodi del repository** (in `ItineraryRepository`):
 `updateStop` (per orari/durata/costo), `reorderStops` (drag & drop **e** ottimizzazione TSP),
-`moveStop`, `reorderDays`, `exportItinerary`/`importItinerary` (condivisione Fase 4).
+`moveStop`, `reorderDays`, `exportItinerary`/`importItinerary` (condivisione).
 
 ---
 
@@ -268,8 +269,6 @@ provvisorio** generato da script dal motivo della linea-percorso. Corretto il di
 marker della mappa (closure vecchia nel canvas web). Test: base64, formato di condivisione,
 capienza QR, export/import del repository, flusso di import a livello di UI (85 in totale).
 
----
-
 **Fase 5** — **Contratto del backend** ([`BACKEND.md`](BACKEND.md)): autenticazione Sanctum,
 entità e tabelle, autorizzazioni per ruolo, protocollo di sincronizzazione (push a batch
 idempotente + pull incrementale con cursore), regola dei conflitti, formato degli errori e
@@ -283,6 +282,8 @@ sezione **Account e sincronizzazione** nelle Impostazioni con i tre stati dichia
 (sync engine, apiClient, sezione account) sono 27 e girano contro un trasporto finto: 112 in
 totale. Emersi e corretti due difetti preesistenti: le modifiche all'**ordine** dentro il
 genitore non finivano in coda, e i campi di `TextField` non avevano nome per lo screen reader.
+
+---
 
 ## 9. Prossimi passi
 
@@ -328,7 +329,7 @@ fatta in aereo che parte al ritorno del segnale, e un token scaduto mentre l'app
    committare a step logici, poi fermarsi per conferma.
 4. Per il design usare la skill **/impeccable** (mondo visivo già definito in `DESIGN.md`).
 
-### Cosa provare per primo nel browser (Fase 4, mai vista da una persona)
+### Cosa provare per primo nel browser (Fasi 4 e 5, mai viste da una persona)
 
 1. Apri un itinerario con qualche tappa → icona **Condividi** in alto a destra: il QR deve
    comparire (arrivo animato) e i pulsanti copia devono dare conferma.
