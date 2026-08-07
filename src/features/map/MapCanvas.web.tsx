@@ -2,7 +2,7 @@
  * MapCanvas (web): stesso HTML Leaflet dentro un <iframe>, così l'anteprima web mostra
  * la mappa reale senza dipendere da react-native-webview.
  */
-import { useEffect, useMemo, useRef } from 'react';
+import { useCallback, useEffect, useMemo, useRef } from 'react';
 import { StyleSheet, View } from 'react-native';
 
 import type { MapCanvasProps } from './MapCanvas.types';
@@ -25,7 +25,16 @@ export function MapCanvas({
     [markers, routeColor, center]
   );
 
-  const send = () => ref.current?.contentWindow?.postMessage(JSON.stringify(payload), '*');
+  // L'iframe è pronto molto dopo il primo render: quando arriva 'ready' i dati sono già
+  // cambiati. Il payload vive quindi in un ref, così `send` manda SEMPRE l'ultimo stato
+  // (con il payload in closure la mappa restava senza marker: il listener era montato una
+  // volta sola e conservava il payload vuoto del primo render).
+  const payloadRef = useRef(payload);
+  payloadRef.current = payload;
+
+  const send = useCallback(() => {
+    ref.current?.contentWindow?.postMessage(JSON.stringify(payloadRef.current), '*');
+  }, []);
 
   useEffect(() => {
     function onMessage(e: MessageEvent) {
@@ -42,13 +51,11 @@ export function MapCanvas({
     }
     window.addEventListener('message', onMessage);
     return () => window.removeEventListener('message', onMessage);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [onMapPress, onMarkerPress]);
+  }, [onMapPress, onMarkerPress, send]);
 
   useEffect(() => {
     if (ready.current) send();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [payload]);
+  }, [payload, send]);
 
   return (
     <View style={[styles.root, style]}>

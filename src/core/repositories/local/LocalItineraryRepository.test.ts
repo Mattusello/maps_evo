@@ -72,6 +72,40 @@ describe('LocalItineraryRepository', () => {
     expect(await repo.get(it.id)).toBeNull();
   });
 
+  it('esporta e reimporta un itinerario come copia indipendente', async () => {
+    const repo = makeRepo();
+    const it = await repo.create({ title: 'Bologna', currency: 'EUR', partySize: 3 }, 'user-1');
+    const day = await repo.addDay(it.id, { label: 'Giorno 1' });
+    await repo.addStop(day.id, {
+      title: 'Piazza Maggiore',
+      category: 'panorama',
+      location: { lat: 44.4938, lng: 11.3426 },
+      cost: { amount: 0, currency: 'EUR' },
+    });
+
+    const exported = await repo.exportItinerary(it.id);
+    const imported = await repo.importItinerary(exported, 'user-2');
+
+    // Copia: id nuovi, nuovo proprietario, l'originale resta intatto.
+    expect(imported.id).not.toBe(it.id);
+    expect(imported.ownerId).toBe('user-2');
+    expect(imported.collaborators).toEqual([{ userId: 'user-2', role: 'owner' }]);
+    expect(await repo.list()).toHaveLength(2);
+
+    const copy = await repo.get(imported.id);
+    expect(copy?.title).toBe('Bologna');
+    expect(copy?.partySize).toBe(3);
+    expect(copy?.days).toHaveLength(1);
+    expect(copy?.days[0].id).not.toBe(day.id);
+    expect(copy?.days[0].stops.map((s) => s.title)).toEqual(['Piazza Maggiore']);
+    expect(copy?.days[0].stops[0].dayId).toBe(copy?.days[0].id);
+
+    // Modificare la copia non tocca l'originale.
+    await repo.removeStop(copy!.days[0].stops[0].id);
+    const original = await repo.get(it.id);
+    expect(original?.days[0].stops).toHaveLength(1);
+  });
+
   it('registra le mutazioni nell’outbox per il sync futuro', async () => {
     const store = createMemoryStore();
     const outbox = new Outbox(store);
