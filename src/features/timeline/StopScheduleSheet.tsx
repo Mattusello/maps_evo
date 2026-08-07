@@ -18,7 +18,7 @@ import type { Currency, Stop } from '@/core/models';
 import type { StopPatch } from '@/core/repositories/contracts';
 import type { ScheduleEntry } from '@/core/schedule/daySchedule';
 import { formatClock, formatDuration, parseClock } from '@/core/utils/time';
-import { categoryColor, categoryLabel } from '@/features/stops/category';
+import { categoryLabel, useCategoryColor } from '@/features/stops/category';
 import { Badge, Button, Chip, Sheet, Text, TextField } from '@/ui/components';
 import { spacing, useTheme } from '@/ui/theme';
 
@@ -70,6 +70,8 @@ export function StopScheduleSheet({
   onRemove,
 }: Props) {
   const { t } = useTranslation();
+  // Colore-linea della categoria nel tema attivo (leggibile in chiaro e in scuro).
+  const categoryColor = useCategoryColor();
   const { colors } = useTheme();
 
   const { control, handleSubmit, reset, setValue, watch, formState } = useForm<FormValues>({

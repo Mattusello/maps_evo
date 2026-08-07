@@ -6,8 +6,10 @@
  * Perché non gorhom qui: vedi il commento in `Sheet.tsx`.
  */
 import { useEffect, useRef, useState, type ReactNode } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Animated, Easing, Pressable, ScrollView, StyleSheet, View } from 'react-native';
 
+import { useReducedMotion } from '../theme/motion';
 import { useTheme } from '../theme/ThemeProvider';
 import { duration, elevation, radius, spacing } from '../theme/tokens';
 
@@ -20,7 +22,9 @@ export type SheetProps = {
 };
 
 export function Sheet({ open, onDismiss, children }: SheetProps) {
+  const { t } = useTranslation();
   const { colors } = useTheme();
+  const reducedMotion = useReducedMotion();
   // `visible` resta true finché l'uscita non è finita, così l'animazione si vede.
   const [visible, setVisible] = useState(open);
   const progress = useRef(new Animated.Value(0)).current;
@@ -29,25 +33,29 @@ export function Sheet({ open, onDismiss, children }: SheetProps) {
     if (open) setVisible(true);
     Animated.timing(progress, {
       toValue: open ? 1 : 0,
-      duration: open ? duration.base : duration.fast,
+      // Con "Riduci movimento" il pannello compare e sparisce senza scorrere.
+      duration: reducedMotion ? 0 : open ? duration.base : duration.fast,
       easing: open ? Easing.out(Easing.cubic) : Easing.in(Easing.cubic),
       // Sul web non esiste il driver nativo: chiederlo produce solo un warning.
       useNativeDriver: false,
     }).start(({ finished }) => {
       if (finished && !open) setVisible(false);
     });
-  }, [open, progress]);
+  }, [open, progress, reducedMotion]);
 
   if (!visible) return null;
 
-  const translateY = progress.interpolate({ inputRange: [0, 1], outputRange: [40, 0] });
+  const translateY = progress.interpolate({
+    inputRange: [0, 1],
+    outputRange: [reducedMotion ? 0 : 40, 0],
+  });
 
   return (
     <View style={StyleSheet.absoluteFill} accessibilityViewIsModal>
       <Animated.View style={[StyleSheet.absoluteFill, styles.backdrop, { opacity: progress }]}>
         <Pressable
           accessibilityRole="button"
-          accessibilityLabel="Chiudi"
+          accessibilityLabel={t('common.close')}
           onPress={onDismiss}
           style={StyleSheet.absoluteFill}
         />

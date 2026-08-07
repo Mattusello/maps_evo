@@ -31,8 +31,9 @@ export default function SettingsScreen() {
         </Section>
 
         <Section title={t('settings.language')}>
-          <Text variant="body" color="textSecondary">
-            Italiano
+          <Text variant="body">{t('settings.languageValue')}</Text>
+          <Text variant="footnote" color="textTertiary">
+            {t('settings.languageNote')}
           </Text>
         </Section>
 

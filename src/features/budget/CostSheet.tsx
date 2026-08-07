@@ -10,7 +10,7 @@ import { StyleSheet, View } from 'react-native';
 
 import type { Currency, Money, Stop } from '@/core/models';
 import { formatMoney } from '@/core/utils/format';
-import { categoryColor, categoryLabel } from '@/features/stops/category';
+import { categoryLabel, useCategoryColor } from '@/features/stops/category';
 import { Button, Sheet, Text, TextField } from '@/ui/components';
 import { spacing, useTheme } from '@/ui/theme';
 
@@ -33,6 +33,8 @@ function parseAmount(value: string): number | null {
 
 export function CostSheet({ stop, currency, crowdPrice, onDismiss, onSave }: Props) {
   const { t } = useTranslation();
+  // Colore-linea della categoria nel tema attivo (leggibile in chiaro e in scuro).
+  const categoryColor = useCategoryColor();
   const { colors } = useTheme();
 
   const [amount, setAmount] = useState('');

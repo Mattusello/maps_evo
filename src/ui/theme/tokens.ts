@@ -112,26 +112,38 @@ export const tabularNums: TextStyle = { fontVariant: ['tabular-nums'] };
 
 /**
  * Ombre con offset + blur (mai aloni a offset zero). Su Android `elevation` guida
- * l'elevazione tonale di Material.
+ * l'elevazione tonale di Material; sul web serve `boxShadow` (react-native-web ignora le
+ * ombre iOS e considera deprecate le proprietà `shadow*`). Senza il ramo web l'anteprima
+ * — che è la superficie di validazione di questo progetto — resterebbe piatta.
  */
 export const elevation = {
   none: {},
   sm: Platform.select({
     ios: { shadowColor: '#0B0C10', shadowOffset: { width: 0, height: 1 }, shadowOpacity: 0.08, shadowRadius: 3 },
     android: { elevation: 2 },
+    web: { boxShadow: '0 1px 3px rgba(11, 12, 16, 0.08)' },
     default: {},
   }),
   md: Platform.select({
     ios: { shadowColor: '#0B0C10', shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.1, shadowRadius: 12 },
     android: { elevation: 6 },
+    web: { boxShadow: '0 4px 12px rgba(11, 12, 16, 0.10)' },
     default: {},
   }),
   lg: Platform.select({
     ios: { shadowColor: '#0B0C10', shadowOffset: { width: 0, height: 10 }, shadowOpacity: 0.14, shadowRadius: 24 },
     android: { elevation: 12 },
+    web: { boxShadow: '0 10px 24px rgba(11, 12, 16, 0.14)' },
     default: {},
   }),
 } as const;
+
+/**
+ * Anello di focus da tastiera. Sul web è disegnato da `src/global.css` con `:focus-visible`
+ * (che distingue la tastiera dal mouse, cosa che lo stato `focused` di react-native-web non
+ * fa); qui restano le misure, così i due lati non divergono.
+ */
+export const focusRing = { width: 2, offset: 2 } as const;
 
 /** Durate di animazione (ms) coerenti col sistema. */
 export const duration = { fast: 150, base: 240, slow: 360 } as const;

@@ -56,7 +56,9 @@ export const lightColors: SemanticColors = {
 
   text: '#14161B',
   textSecondary: '#565D6B',
-  textTertiary: '#838A98',
+  // Il terziario porta didascalie e placeholder, cioè testo piccolo: deve stare sopra
+  // 4.5:1 sul fondo. Il grigio precedente (#838A98) si fermava a 3.3:1.
+  textTertiary: '#697080',
 
   primary: '#3A31E0',
   onPrimary: '#FFFFFF',
@@ -79,7 +81,8 @@ export const darkColors: SemanticColors = {
 
   text: '#F3F5F8',
   textSecondary: '#A6ADBB',
-  textTertiary: '#717886',
+  // Come nel tema chiaro: alzato da #717886 (4.1:1 sulla superficie) a 4.7:1.
+  textTertiary: '#7B8394',
 
   primary: '#8F87FF',
   onPrimary: '#0B0C10',
@@ -96,21 +99,49 @@ export const darkColors: SemanticColors = {
 
 /**
  * Colori delle categorie di tappa = "colori di linea" del sistema di segnaletica.
- * Usati per i marker sulla mappa e i chip di categoria. Un set unico per entrambi i temi
- * (già sufficientemente vividi per fondo chiaro e scuro).
+ * Marcano i pin sulla mappa, i pallini e — questo è il punto delicato — le **etichette**
+ * di categoria, che sono testo piccolo.
+ *
+ * Perché due set e non uno: un colore leggibile su fondo chiaro (≥4.5:1 su bianco) è per
+ * forza scuro, e lo stesso colore su fondo scuro non arriva al contrasto minimo. Un set
+ * unico non può soddisfare entrambi i temi: qui ogni tema ha la sua versione della stessa
+ * tinta. Le tinte restano riconoscibili tra chiaro e scuro (stessa "linea").
  */
-export const categoryColors = {
+const lightCategoryColors = {
   cultura: '#6C4BF0',
-  cibo: '#E8590C',
-  natura: '#0E8A4F',
-  panorama: '#1098AD',
+  cibo: '#C2410C',
+  natura: '#0F7A46',
+  panorama: '#0E7490',
   shopping: '#D6336C',
   notte: '#7048E8',
-  alloggio: '#B4790B',
+  alloggio: '#92650A',
   trasporto: '#5C6470',
 } as const;
 
-export type CategoryKey = keyof typeof categoryColors;
+const darkCategoryColors: Record<keyof typeof lightCategoryColors, string> = {
+  cultura: '#A594FF',
+  cibo: '#FF9152',
+  natura: '#4ED18B',
+  panorama: '#4FD0E3',
+  shopping: '#FF7BA6',
+  notte: '#A78BFF',
+  alloggio: '#E0A93A',
+  trasporto: '#9AA3B2',
+};
+
+export const categoryPalettes = {
+  light: lightCategoryColors,
+  dark: darkCategoryColors,
+} as const;
+
+/**
+ * Set del tema chiaro, da usare **anche in dark mode sopra la mappa**: le tile di
+ * OpenStreetMap restano chiare in entrambi i temi, quindi i pin devono contrastare con
+ * quelle, non con lo sfondo dell'app.
+ */
+export const mapCategoryColors = lightCategoryColors;
+
+export type CategoryKey = keyof typeof lightCategoryColors;
 
 export type ColorScheme = 'light' | 'dark';
 

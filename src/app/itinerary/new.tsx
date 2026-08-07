@@ -110,7 +110,7 @@ export default function NewItineraryScreen() {
                   size="sm"
                   leftIcon={<Minus color={colors.primary} size={18} />}
                   onPress={() => onChange(Math.max(1, value - 1))}
-                  accessibilityLabel="-"
+                  accessibilityLabel={t('budget.fewerPeople')}
                 />
                 <Text variant="title3" tabular style={styles.count}>
                   {t('budget.people', { count: value })}
@@ -121,7 +121,7 @@ export default function NewItineraryScreen() {
                   size="sm"
                   leftIcon={<Plus color={colors.primary} size={18} />}
                   onPress={() => onChange(value + 1)}
-                  accessibilityLabel="+"
+                  accessibilityLabel={t('budget.morePeople')}
                 />
               </View>
             </View>

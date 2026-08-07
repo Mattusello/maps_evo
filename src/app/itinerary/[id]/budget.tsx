@@ -16,13 +16,15 @@ import { getItineraryRepository, getPriceReportRepository } from '@/core/reposit
 import { formatMoney } from '@/core/utils/format';
 import { BudgetSummary } from '@/features/budget/BudgetSummary';
 import { CostSheet } from '@/features/budget/CostSheet';
-import { categoryColor } from '@/features/stops/category';
+import { useCategoryColor } from '@/features/stops/category';
 import { Badge, Card, EmptyState, Screen, Skeleton, Text } from '@/ui/components';
 import { spacing, useTheme } from '@/ui/theme';
 
 export default function ItineraryBudgetScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const { t } = useTranslation();
+  // Colore-linea della categoria nel tema attivo (leggibile in chiaro e in scuro).
+  const categoryColor = useCategoryColor();
   const router = useRouter();
   const { colors } = useTheme();
   const repo = useMemo(() => getItineraryRepository(), []);
@@ -115,7 +117,8 @@ export default function ItineraryBudgetScreen() {
       ) : !detail || !budget ? (
         <EmptyState
           icon={<PiggyBank color={colors.primary} size={36} />}
-          title={t('common.retry')}
+          title={t('errors.notFound.title')}
+          body={t('errors.notFound.body')}
           actionLabel={t('common.back')}
           onAction={() => router.back()}
         />
@@ -148,7 +151,7 @@ export default function ItineraryBudgetScreen() {
 
               {day.items.length === 0 ? (
                 <Text variant="footnote" color="textTertiary">
-                  {t('itineraries.empty.body')}
+                  {t('itineraries.dayEmpty')}
                 </Text>
               ) : (
                 <Card padding="none">

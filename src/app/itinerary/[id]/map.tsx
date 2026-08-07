@@ -12,7 +12,7 @@ import { getItineraryRepository } from '@/core/repositories';
 import { MapCanvas } from '@/features/map/MapCanvas';
 import type { MapMarker } from '@/features/map/MapCanvas.types';
 import { PoiSearchBar } from '@/features/map/PoiSearchBar';
-import { categoryColor } from '@/features/stops/category';
+import { mapCategoryColor } from '@/features/stops/category';
 import { StopDetailSheet } from '@/features/stops/StopDetailSheet';
 import { elevation, spacing, useTheme } from '@/ui/theme';
 
@@ -50,7 +50,7 @@ export default function ItineraryMapScreen() {
         id: s.id,
         lat: s.location.lat,
         lng: s.location.lng,
-        color: categoryColor(s.category),
+        color: mapCategoryColor(s.category),
         label: s.title,
         index: i + 1,
       })),

@@ -1,5 +1,14 @@
 import { useFocusEffect, useLocalSearchParams, useRouter } from 'expo-router';
-import { ArrowLeft, CalendarPlus, Map, PiggyBank, Clock, Share2, Users } from 'lucide-react-native';
+import {
+  ArrowLeft,
+  CalendarPlus,
+  Clock,
+  Map,
+  MapPinned,
+  PiggyBank,
+  Share2,
+  Users,
+} from 'lucide-react-native';
 import { useCallback, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Pressable, ScrollView, StyleSheet, View } from 'react-native';
@@ -9,7 +18,7 @@ import { getItineraryRepository } from '@/core/repositories';
 import type { Collaborator, ItineraryWithDetails } from '@/core/models';
 import { CollaboratorsSheet } from '@/features/sharing/CollaboratorsSheet';
 import { ShareSheet } from '@/features/sharing/ShareSheet';
-import { Badge, Button, Card, Screen, Skeleton, Text } from '@/ui/components';
+import { Badge, Button, Card, EmptyState, Screen, Skeleton, Text } from '@/ui/components';
 import { minTapTarget, spacing, useTheme } from '@/ui/theme';
 
 export default function ItineraryDetailScreen() {
@@ -93,9 +102,13 @@ export default function ItineraryDetailScreen() {
             <Skeleton height={18} width="50%" />
           </View>
         ) : !detail ? (
-          <Text variant="body" color="textSecondary">
-            {t('common.retry')}
-          </Text>
+          <EmptyState
+            icon={<MapPinned color={colors.primary} size={36} />}
+            title={t('errors.notFound.title')}
+            body={t('errors.notFound.body')}
+            actionLabel={t('common.back')}
+            onAction={() => router.back()}
+          />
         ) : (
           <>
             <View style={styles.head}>
@@ -122,7 +135,7 @@ export default function ItineraryDetailScreen() {
             <View style={styles.actions}>
               <ActionTile
                 icon={<Map color={colors.primary} size={22} />}
-                label={t('tabs.explore')}
+                label={t('map.title')}
                 onPress={() => router.push(`/itinerary/${id}/map`)}
               />
               <ActionTile
@@ -146,7 +159,7 @@ export default function ItineraryDetailScreen() {
                   </Text>
                   {day.stops.length === 0 ? (
                     <Text variant="footnote" color="textTertiary" style={{ marginTop: spacing.xs }}>
-                      {t('itineraries.empty.body')}
+                      {t('itineraries.dayEmpty')}
                     </Text>
                   ) : (
                     day.stops.map((s) => (
@@ -159,7 +172,7 @@ export default function ItineraryDetailScreen() {
               ))}
 
               <Button
-                label={t('common.add')}
+                label={t('itineraries.addDay')}
                 variant="tonal"
                 fullWidth
                 leftIcon={<CalendarPlus color={colors.onPrimaryContainer} size={18} />}

@@ -11,7 +11,7 @@ export default function ExploreScreen() {
     <Screen>
       <EmptyState
         icon={<Compass color={colors.primary} size={36} />}
-        title={t('tabs.explore')}
+        title={t('explore.title')}
         body={t('explore.comingSoon')}
       />
     </Screen>

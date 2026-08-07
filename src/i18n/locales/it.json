@@ -13,7 +13,14 @@
     "estimated": "Stimato",
     "perPerson": "a persona",
     "today": "Oggi",
-    "comingSoon": "In arrivo"
+    "comingSoon": "In arrivo",
+    "close": "Chiudi"
+  },
+  "errors": {
+    "notFound": {
+      "title": "Itinerario non trovato",
+      "body": "Forse è stato eliminato da questo dispositivo, o il link non è più valido."
+    }
   },
   "tabs": {
     "itineraries": "Itinerari",
@@ -21,7 +28,8 @@
     "settings": "Impostazioni"
   },
   "explore": {
-    "comingSoon": "Scoperta di tappe e itinerari in arrivo nelle prossime fasi."
+    "comingSoon": "La scoperta di tappe e itinerari da altri viaggiatori arriva in una fase successiva. Intanto puoi importare un itinerario che ti hanno mandato.",
+    "title": "Esplora"
   },
   "itineraries": {
     "title": "I tuoi itinerari",
@@ -43,7 +51,9 @@
     "stops_one": "{{count}} tappa",
     "stops_other": "{{count}} tappe",
     "count_one": "{{count}} itinerario",
-    "count_other": "{{count}} itinerari"
+    "count_other": "{{count}} itinerari",
+    "dayEmpty": "Nessuna tappa in questo giorno.",
+    "addDay": "Aggiungi un giorno"
   },
   "stop": {
     "openNow": "Aperto",
@@ -84,7 +94,8 @@
   "map": {
     "searchPlaceholder": "Cerca un luogo…",
     "customStop": "Punto sulla mappa",
-    "tapHint": "Tocca la mappa per aggiungere una tappa"
+    "tapHint": "Tocca la mappa per aggiungere una tappa",
+    "title": "Mappa"
   },
   "crowd": {
     "low": "Poco affollato",
@@ -155,7 +166,9 @@
       "title": "Ancora nessun costo",
       "body": "Aggiungi le tappe e il loro costo: qui vedrai il totale del viaggio e la quota di ciascuno.",
       "cta": "Apri la mappa"
-    }
+    },
+    "morePeople": "Un partecipante in più",
+    "fewerPeople": "Un partecipante in meno"
   },
   "sharing": {
     "title": "Condividi",
@@ -206,8 +219,14 @@
   "settings": {
     "title": "Impostazioni",
     "appearance": "Aspetto",
-    "theme": { "system": "Sistema", "light": "Chiaro", "dark": "Scuro" },
+    "theme": {
+      "system": "Sistema",
+      "light": "Chiaro",
+      "dark": "Scuro"
+    },
     "language": "Lingua",
-    "about": "Informazioni"
+    "about": "Informazioni",
+    "languageValue": "Italiano",
+    "languageNote": "Per ora l'app parla solo italiano."
   }
 }

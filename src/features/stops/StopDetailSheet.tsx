@@ -15,7 +15,7 @@ import { formatMoney } from '@/core/utils/format';
 import { Badge, Button, Sheet, Text, TextField } from '@/ui/components';
 import { spacing, useTheme } from '@/ui/theme';
 import { CrowdBars } from './CrowdBars';
-import { categoryColor, categoryLabel } from './category';
+import { categoryLabel, useCategoryColor } from './category';
 import { CLOSING_SOON_THRESHOLD, getOpenStatus } from './openingHours';
 
 type Props = {
@@ -28,6 +28,8 @@ type Props = {
 
 export function StopDetailSheet({ stop, currency, userId, onDismiss, onRemove }: Props) {
   const { t } = useTranslation();
+  // Colore-linea della categoria nel tema attivo (leggibile in chiaro e in scuro).
+  const categoryColor = useCategoryColor();
   const { colors } = useTheme();
 
   const [reports, setReports] = useState<PriceReport[]>([]);

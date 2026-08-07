@@ -10,7 +10,7 @@ import { MapPin, Search, X } from 'lucide-react-native';
 import type { Location } from '@/core/models';
 import { getPoiProvider, type PoiSuggestion } from '@/core/providers';
 import { Card, Text, TextField } from '@/ui/components';
-import { categoryColor } from '@/features/stops/category';
+import { useCategoryColor } from '@/features/stops/category';
 import { elevation, spacing, useTheme } from '@/ui/theme';
 
 export function PoiSearchBar({
@@ -21,6 +21,8 @@ export function PoiSearchBar({
   onSelect: (s: PoiSuggestion) => void;
 }) {
   const { t } = useTranslation();
+  // Colore-linea della categoria nel tema attivo (leggibile in chiaro e in scuro).
+  const categoryColor = useCategoryColor();
   const { colors } = useTheme();
   const [query, setQuery] = useState('');
   const [results, setResults] = useState<PoiSuggestion[]>([]);

@@ -86,9 +86,11 @@ export function Button({
       ) : (
         <View style={styles.content}>
           {leftIcon}
-          <Text variant={sz.variant} colorValue={fg} numberOfLines={1}>
-            {label}
-          </Text>
+          {label ? (
+            <Text variant={sz.variant} colorValue={fg} numberOfLines={1}>
+              {label}
+            </Text>
+          ) : null}
           {rightIcon}
         </View>
       )}

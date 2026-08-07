@@ -7,16 +7,16 @@
  * "usa il link" che mostrare un quadrato illeggibile.
  */
 import { Check, Copy, FileJson, Link2, Share2 } from 'lucide-react-native';
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { StyleSheet, useWindowDimensions, View } from 'react-native';
+import { Animated, Easing, StyleSheet, useWindowDimensions, View } from 'react-native';
 import QRCode from 'react-native-qrcode-svg';
 
 import type { ItineraryWithDetails } from '@/core/models';
 import { encodeShareCode, exportItineraryJson, fitsInQr } from '@/core/sharing/shareCode';
 import { buildShareUrl } from '@/core/sharing/shareLink';
 import { Button, Sheet, Text } from '@/ui/components';
-import { lightColors, radius, spacing, useTheme } from '@/ui/theme';
+import { duration, lightColors, radius, spacing, useReducedMotion, useTheme } from '@/ui/theme';
 
 import { copyToClipboard, shareOrCopy } from './shareActions';
 
@@ -56,16 +56,62 @@ export function ShareSheet({ detail, open, onDismiss }: ShareSheetProps) {
   // Il QR non deve mai eccedere la larghezza del foglio (schermi piccoli inclusi).
   const qrSize = Math.min(QR_MAX_SIZE, width - spacing.lg * 4 - QR_PLATE_PADDING * 2);
 
-  // Il messaggio di conferma è transitorio: sparisce da solo.
-  useEffect(() => {
-    if (!feedback) return;
-    const timer = setTimeout(() => setFeedback(null), 2500);
-    return () => clearTimeout(timer);
-  }, [feedback]);
+  // --- Movimento ---
+  // Momento d'autore della Fase 4: il QR *arriva*, una volta sola, appena il foglio si è
+  // posato. È l'istante in cui l'itinerario esce dal telefono, e nient'altro qui si muove.
+  const reducedMotion = useReducedMotion();
+  const qrEntrance = useRef(new Animated.Value(0)).current;
+  const feedbackEntrance = useRef(new Animated.Value(0)).current;
 
   useEffect(() => {
-    if (!open) setFeedback(null);
-  }, [open]);
+    if (!open) {
+      qrEntrance.setValue(0);
+      return;
+    }
+    if (reducedMotion) {
+      qrEntrance.setValue(1);
+      return;
+    }
+    const animation = Animated.timing(qrEntrance, {
+      toValue: 1,
+      duration: duration.base,
+      delay: 120, // il foglio è già fermo: l'arrivo si legge come un gesto distinto
+      easing: Easing.out(Easing.cubic),
+      useNativeDriver: false,
+    });
+    animation.start();
+    return () => animation.stop();
+  }, [open, reducedMotion, qrEntrance]);
+
+  // Il messaggio di conferma entra breve ed esce ancora più in fretta.
+  useEffect(() => {
+    if (!feedback) return;
+    Animated.timing(feedbackEntrance, {
+      toValue: 1,
+      duration: reducedMotion ? 0 : duration.fast,
+      easing: Easing.out(Easing.cubic),
+      useNativeDriver: false,
+    }).start();
+
+    const timer = setTimeout(() => {
+      Animated.timing(feedbackEntrance, {
+        toValue: 0,
+        duration: reducedMotion ? 0 : 100,
+        easing: Easing.in(Easing.cubic),
+        useNativeDriver: false,
+      }).start(({ finished }) => {
+        if (finished) setFeedback(null);
+      });
+    }, 2500);
+    return () => clearTimeout(timer);
+  }, [feedback, feedbackEntrance, reducedMotion]);
+
+  useEffect(() => {
+    if (!open) {
+      setFeedback(null);
+      feedbackEntrance.setValue(0);
+    }
+  }, [open, feedbackEntrance]);
 
   const run = async (action: () => Promise<string | null>) => {
     setFeedback(await action());
@@ -83,7 +129,21 @@ export function ShareSheet({ detail, open, onDismiss }: ShareSheetProps) {
       </View>
 
       {qrOk ? (
-        <View style={styles.qrWrap}>
+        <Animated.View
+          style={[
+            styles.qrWrap,
+            {
+              opacity: qrEntrance,
+              transform: [
+                {
+                  translateY: qrEntrance.interpolate({
+                    inputRange: [0, 1],
+                    outputRange: [10, 0],
+                  }),
+                },
+              ],
+            },
+          ]}>
           <View style={[styles.qrPlate, { backgroundColor: lightColors.surface }]}>
             <QRCode
               value={url}
@@ -96,7 +156,7 @@ export function ShareSheet({ detail, open, onDismiss }: ShareSheetProps) {
           <Text variant="footnote" color="textSecondary" style={styles.center}>
             {t('sharing.qrHint')}
           </Text>
-        </View>
+        </Animated.View>
       ) : (
         <View style={[styles.notice, { backgroundColor: colors.surfaceMuted }]}>
           <Text variant="footnote" color="textSecondary">
@@ -172,12 +232,27 @@ export function ShareSheet({ detail, open, onDismiss }: ShareSheetProps) {
       </View>
 
       {feedback ? (
-        <View style={styles.feedback}>
+        <Animated.View
+          accessibilityLiveRegion="polite"
+          style={[
+            styles.feedback,
+            {
+              opacity: feedbackEntrance,
+              transform: [
+                {
+                  translateY: feedbackEntrance.interpolate({
+                    inputRange: [0, 1],
+                    outputRange: [2, 0],
+                  }),
+                },
+              ],
+            },
+          ]}>
           <Check color={colors.success} size={16} />
           <Text variant="footnote" color="success">
             {feedback}
           </Text>
-        </View>
+        </Animated.View>
       ) : null}
 
       <Text variant="footnote" color="textTertiary">

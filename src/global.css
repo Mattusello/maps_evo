@@ -8,6 +8,17 @@
  * Valori come canali "R G B" così Tailwind può applicare l'alpha (es. bg-primary/10).
  */
 @layer base {
+  /*
+   * Focus da tastiera (solo web). react-native-web non disegna nessun indicatore sui
+   * `Pressable`: senza questa regola, chi naviga con il tab non sa dove si trova.
+   * `:focus-visible` lo mostra alla tastiera e non al clic del mouse; le misure sono
+   * quelle del token `focusRing` in `ui/theme/tokens.ts`.
+   */
+  :focus-visible {
+    outline: 2px solid rgb(var(--color-primary));
+    outline-offset: 2px;
+  }
+
   :root {
     --color-background: 247 248 250;
     --color-surface: 255 255 255;
@@ -16,7 +27,7 @@
 
     --color-text: 20 22 27;
     --color-text-secondary: 86 93 107;
-    --color-text-tertiary: 131 138 152;
+    --color-text-tertiary: 105 112 128;
 
     --color-primary: 58 49 224;
     --color-on-primary: 255 255 255;
@@ -43,7 +54,7 @@
 
       --color-text: 243 245 248;
       --color-text-secondary: 166 173 187;
-      --color-text-tertiary: 113 120 134;
+      --color-text-tertiary: 123 131 148;
 
       --color-primary: 143 135 255;
       --color-on-primary: 11 12 16;

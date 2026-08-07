@@ -40,7 +40,7 @@ export function BudgetSummary({ budget, onChangePartySize }: Props) {
           label=""
           variant="outline"
           size="sm"
-          accessibilityLabel={`${t('budget.split')} −`}
+          accessibilityLabel={t('budget.fewerPeople')}
           disabled={budget.partySize <= 1}
           leftIcon={<Minus color={colors.primary} size={18} />}
           onPress={() => onChangePartySize(Math.max(1, budget.partySize - 1))}
@@ -52,7 +52,7 @@ export function BudgetSummary({ budget, onChangePartySize }: Props) {
           label=""
           variant="outline"
           size="sm"
-          accessibilityLabel={`${t('budget.split')} +`}
+          accessibilityLabel={t('budget.morePeople')}
           leftIcon={<Plus color={colors.primary} size={18} />}
           onPress={() => onChangePartySize(budget.partySize + 1)}
         />

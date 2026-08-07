@@ -167,7 +167,8 @@ export default function ItineraryTimelineScreen() {
       ) : !detail ? (
         <EmptyState
           icon={<Clock color={colors.primary} size={36} />}
-          title={t('common.retry')}
+          title={t('errors.notFound.title')}
+          body={t('errors.notFound.body')}
           actionLabel={t('common.back')}
           onAction={() => router.back()}
         />

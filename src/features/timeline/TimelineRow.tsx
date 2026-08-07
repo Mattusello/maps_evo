@@ -15,7 +15,7 @@ import type { CrowdEstimate } from '@/core/models';
 import type { ScheduleEntry } from '@/core/schedule/daySchedule';
 import { formatDistance, formatMoney } from '@/core/utils/format';
 import { formatClock, formatDuration } from '@/core/utils/time';
-import { categoryColor, categoryLabel } from '@/features/stops/category';
+import { categoryLabel, useCategoryColor } from '@/features/stops/category';
 import { Badge, Text } from '@/ui/components';
 import { elevation, radius, spacing, useTheme } from '@/ui/theme';
 
@@ -39,7 +39,7 @@ type Props = {
 export function TimelineRow({ entry, position, isFirst, crowd, isActive, handle, onPress }: Props) {
   const { t } = useTranslation();
   const { colors } = useTheme();
-  const color = categoryColor(entry.stop.category);
+  const color = useCategoryColor()(entry.stop.category);
 
   const crowdTone =
     crowd?.level === 'basso' ? 'success' : crowd?.level === 'medio' ? 'warning' : 'danger';

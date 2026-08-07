@@ -3,7 +3,7 @@ import { Compass, Route, Settings as SettingsIcon } from 'lucide-react-native';
 import { useTranslation } from 'react-i18next';
 import { StyleSheet } from 'react-native';
 
-import { useTheme } from '@/ui/theme';
+import { typography, useTheme } from '@/ui/theme';
 
 export default function TabsLayout() {
   const { colors } = useTheme();
@@ -20,7 +20,13 @@ export default function TabsLayout() {
           borderTopColor: colors.border,
           borderTopWidth: StyleSheet.hairlineWidth,
         },
-        tabBarLabelStyle: { fontSize: 11, fontWeight: '600' },
+        // Le etichette le disegna il navigator, quindi non passano da <Text variant>:
+        // le misure arrivano comunque dai token, per non far divergere le due strade.
+        tabBarLabelStyle: {
+          fontSize: typography.overline.fontSize,
+          fontWeight: '600',
+          fontFamily: typography.caption.fontFamily,
+        },
       }}>
       <Tabs.Screen
         name="index"
