@@ -192,7 +192,16 @@ Regole per il server:
 - **Atomicità per operazione**, non per batch: se la terza fallisce, le prime due restano.
 - **`create` di un id già esistente** = `update` (il client può aver perso la risposta e
   riprovato con un id di operazione nuovo).
-- **`delete`** valorizza `deletedAt`, non cancella la riga.
+- **`delete`** valorizza `deletedAt`, non cancella la riga. La cancellazione di un **giorno
+  elimina a cascata le sue tappe** (il client fa lo stesso in locale e non manda
+  un'operazione per ogni tappa).
+- **`ownerId` in arrivo si ignora**: vale sempre l'utente autenticato. Il client può aver
+  creato itinerari *prima* dell'accesso, firmandoli con la propria identità locale; è il
+  primo push a dar loro un proprietario vero.
+- **Aspettarsi operazioni sul genitore.** Creare un giorno cambia anche `dayIds`
+  dell'itinerario, e creare una tappa cambia `orderedStopIds` del giorno: il client manda
+  prima il figlio e subito dopo l'aggiornamento del genitore. Sono due operazioni distinte
+  e vanno applicate entrambe.
 - **Batch massimo 200 operazioni**: oltre, rispondere `413`. Il client spezza da solo in
   blocchi da 100.
 - Un errore di rete o un `5xx` **non è un rifiuto**: il client tiene la coda e riprova più

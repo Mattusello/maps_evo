@@ -1,6 +1,7 @@
-# MyMappa — Documento di Handoff (Fasi 1 → 4)
+# MyMappa — Documento di Handoff (Fasi 1 → 5)
 
-Documento per **riprendere il progetto** (Fase 5 e successive) in un secondo momento.
+Documento per **riprendere il progetto** in un secondo momento: resta da scrivere il backend
+Laravel vero, seguendo il contratto in [`BACKEND.md`](BACKEND.md).
 Riassume stato, decisioni, architettura, come far girare/verificare e i prossimi passi.
 
 - **Prodotto:** app mobile (iOS + Android) per creare, organizzare e condividere **itinerari di
@@ -23,14 +24,19 @@ Brief originale completo: [`prompt-claude-code-itinerari.md`](../prompt-claude-c
 | 2 | Mappa OSM, ricerca POI, aggiunta/dettaglio tappa (3 provider) | ✅ |
 | 3 | Timeline + drag & drop, budget, ottimizzazione percorso (TSP) | ✅ |
 | 4 | Condivisione (QR/link/codice), import, collaboratori, rifinitura | ✅ |
-| 5 | Backend Laravel (BACKEND.md + ApiItineraryRepository), test estesi | ⬜ |
+| 5 | Contratto backend + sincronizzazione lato app | ✅ lato app |
+| 5b | **Il backend Laravel vero**, da scrivere seguendo `docs/BACKEND.md` | ⬜ |
 
-Verifiche verdi all'ultimo commit: `tsc` pulito, **85 test** verdi, bundle web ok, detector
+Verifiche verdi all'ultimo commit: `tsc` pulito, **112 test** verdi, bundle web ok, detector
 di `/impeccable` pulito.
 
-⚠️ **La Fase 4 non è ancora stata guardata nel browser da una persona**: durante lo sviluppo
-l'estensione Chrome non era collegata, quindi la verifica visiva è rimasta all'utente. Cosa
-provare per prima cosa: §10.
+⚠️ Due cose non verificate da una persona, ed è bene saperlo:
+- **La Fase 4 non è ancora stata guardata nel browser** (l'estensione Chrome non era
+  collegata durante lo sviluppo). Cosa provare per prima cosa: §10.
+- **La Fase 5 non ha mai parlato con un server vero**: su questo PC non ci sono PHP né
+  Composer. Il motore di sincronizzazione è provato contro un trasporto finto che rispetta
+  `docs/BACKEND.md`; quei test sono la specifica eseguibile del protocollo, non una prova
+  che il backend funzioni.
 
 ---
 
@@ -58,20 +64,21 @@ provare per prima cosa: §10.
 npm install
 npm run web           # ANTEPRIMA PRINCIPALE (localhost:8081) — vedi §7 sul perché
 npm run typecheck     # tsc --noEmit
-npm test              # Jest (85 test)
+npm test              # Jest (112 test)
 npm run assets:brand  # rigenera icona/splash/favicon dal motivo della linea-percorso
 npm start             # dev server (QR) per device — richiede un dev build, vedi §7
 ```
 
-**Test di componente** (introdotti in Fase 4, vedi `src/app/import.test.tsx`): si montano con
+**Test di componente** (introdotti in Fase 4, vedi `src/test/importScreen.test.tsx`): si montano con
 `renderWithProviders` (`src/test/`), che porta tema, safe-area e i18n. Attenzione: in
 @testing-library/react-native 14 **`render` e `fireEvent` sono asincroni** e vanno attesi con
 `await`, altrimenti gli aggiornamenti di stato non risultano applicati. La configurazione
 necessaria sta in `jest.config.js` (resolver di `react-native-worklets`, mapping di
 `lucide-react-native` sulla build CJS) e in `jest.setup.js` (`IS_REACT_ACT_ENVIRONMENT`).
 
-Chiavi/API: nessuna richiesta in Fase 1–2 (stack OSM gratuito). Vedi `.env.example` per le
-variabili future (Google, backend).
+Chiavi/API: nessuna richiesta per usare l app (stack OSM gratuito). Il backend si attiva con
+`EXPO_PUBLIC_API_URL` + `EXPO_PUBLIC_USE_API` (vedi `.env.example`); senza, l app resta locale
+e lo dichiara nelle Impostazioni.
 
 ---
 
@@ -99,23 +106,24 @@ src/
     repositories/
       contracts/               # ItineraryRepository, AuthRepository, PriceReportRepository
       local/                   # impl. Fase 1/2 (AsyncStorage + outbox)
-      api/                     # ApiItineraryRepository PREDISPOSTA (Laravel, Fase 5)
+      api/                     # ApiItineraryRepository (solo online) + ApiAuthRepository
       index.ts                 # factory: sceglie impl. da env (getItineraryRepository, …)
     providers/                 # POI / prezzi / affollamento dietro interfacce (§5)
       contracts/  poi/  crowd/  price/  index.ts
     storage/keyValueStore.ts   # astrazione AsyncStorage (→ SQLite in futuro)
     utils/base64.ts            # base64url UTF-8 scritto a mano (Hermes non ha btoa)
-    sync/outbox.ts             # coda mutazioni per sync futuro
-    api/apiClient.ts           # client HTTP centralizzato (token/errori) per Laravel
+    sync/                      # outbox + contracts + syncEngine + ApiSyncTransport (Fase 5)
+    api/                       # apiClient (token, timeout, classificazione errori) + tokenStore
     config/env.ts              # lettura EXPO_PUBLIC_*
     utils/                     # id (uuid), time, format (money/price level)
-  context/                     # ItinerariesContext, AuthContext, SettingsContext
+  context/                     # Itineraries, Auth (sessione), Settings, Sync (Fase 5)
   features/
     itineraries/components/    # RouteStrip (motivo firma), ItineraryCard
     map/                       # MapCanvas(.web), leafletHtml, mapPayload, PoiSearchBar
     stops/                     # StopDetailSheet, CrowdBars, openingHours, category
     timeline/                  # DayTimeline, TimelineRow, StopScheduleSheet (Fase 3)
     budget/                    # BudgetSummary, CostSheet (Fase 3)
+    sync/                      # AccountSyncCard: account e stato della sincronizzazione
     sharing/                   # ShareSheet (QR/link/codice), CollaboratorsSheet,
                                # shareActions (appunti + foglio di sistema) (Fase 4)
   test/                        # renderWithProviders per i test di componente (Fase 4)
@@ -125,7 +133,7 @@ src/
     components/                # Text, Button, Card, Badge, Chip, Screen, EmptyState, Fab,
                                # Skeleton, TextField, Sheet(.web), DraggableList
   i18n/                        # config + locales/it.json (NIENTE stringhe hardcoded)
-docs/                          # DATA_PROVIDERS.md, HANDOFF.md (questo file)
+docs/                          # DATA_PROVIDERS.md, BACKEND.md (contratto server), HANDOFF.md
 ```
 
 ### Pattern chiave da rispettare
@@ -143,6 +151,14 @@ docs/                          # DATA_PROVIDERS.md, HANDOFF.md (questo file)
   pure e testate; le schermate presentano soltanto.
 - **Costi a persona:** `Stop.cost` è il costo **per persona** (come i `PriceReport`); il totale
   di gruppo è `costo × partySize`. Non mescolare le due letture.
+- **Il locale resta la sorgente di verità.** Anche con il backend attivo la UI legge e scrive
+  dal repository locale: il server è la copia condivisa, e ad allineare le due parti è il
+  `SyncEngine`. Quindi: ogni mutazione deve lasciare una voce nell'**outbox** (se cambia anche
+  il genitore — l'ordine dei giorni o delle tappe — vanno messe in coda **entrambe**), e i dati
+  che arrivano dal server si scrivono con `LocalCollections`, **mai** passando dal repository:
+  altrimenti tornerebbero in coda verso il mittente.
+- **Distinguere "non c'è rete" da "il server ha rifiutato".** È `ApiError.isNetwork` a deciderlo,
+  ed è ciò che stabilisce se una modifica si riprova o si scarta: non inghiottire quell'errore.
 - **Condivisione = copia.** Un itinerario ricevuto diventa una **copia locale** con id nuovi:
   non è un documento condiviso finché non c'è il backend. La UI lo dichiara; non promettere
   sincronizzazione. Il formato del codice è versionato (`SHARE_CODE_VERSION`): un codice più
@@ -200,7 +216,10 @@ soft-delete (`deletedAt`).
 - **Animazioni Reanimated sul web:** le molle (`withSpring`) possono congelarsi a metà corsa.
   In `DraggableList` si usa `withTiming` e la posizione di riposo viene sempre riallineata da
   React (`initialIndex`), così una animazione interrotta non lascia la lista disallineata.
-- Il PC di sviluppo **non ha Java né Android SDK** (build Android locale non immediata).
+- Il PC di sviluppo **non ha Java né Android SDK** (build Android locale non immediata),
+  **né PHP né Composer**: il backend Laravel non è scrivibile/eseguibile da qui. Per questo
+  la Fase 5 consegna il contratto (`docs/BACKEND.md`) e tutto il lato app, provato contro un
+  trasporto finto.
 
 ---
 
@@ -251,6 +270,20 @@ capienza QR, export/import del repository, flusso di import a livello di UI (85 
 
 ---
 
+**Fase 5** — **Contratto del backend** ([`BACKEND.md`](BACKEND.md)): autenticazione Sanctum,
+entità e tabelle, autorizzazioni per ruolo, protocollo di sincronizzazione (push a batch
+idempotente + pull incrementale con cursore), regola dei conflitti, formato degli errori e
+cosa fa il client per ognuno. **Lato app**: `SyncEngine` che svuota l'outbox e riporta le
+modifiche del server nelle stesse collezioni del repository locale; `apiClient` costruito
+attorno alla distinzione fra errore di rete (si riprova) e rifiuto (si scarta), con token
+Sanctum persistito e 401 che chiude la sessione senza toccare i dati locali;
+`ApiAuthRepository` con accesso, registrazione e uscita; `SyncContext` che decide *quando*
+sincronizzare (avvio, ritorno in primo piano, richiesta esplicita — nessun timer di fondo);
+sezione **Account e sincronizzazione** nelle Impostazioni con i tre stati dichiarati. I test
+(sync engine, apiClient, sezione account) sono 27 e girano contro un trasporto finto: 112 in
+totale. Emersi e corretti due difetti preesistenti: le modifiche all'**ordine** dentro il
+genitore non finivano in coda, e i campi di `TextField` non avevano nome per lo screen reader.
+
 ## 9. Prossimi passi
 
 ### Rimasto indietro dalla Fase 4 (piccolo)
@@ -259,12 +292,31 @@ capienza QR, export/import del repository, flusso di import a livello di UI (85 
 - **Esplora** è ancora un segnaposto dichiarato: la superficie va progettata quando serve.
 - **Hover sul web** non implementato di proposito (app native-first, web = superficie di
   validazione). Da progettare solo se il web diventa un target di spedizione.
-- La condivisione produce **copie**: la collaborazione vera dipende dalla Fase 5.
+- La condivisione produce **copie**: la collaborazione vera arriva col backend.
 
-### Fase 5 — Backend Laravel
-- Scrivere `docs/BACKEND.md` (endpoint REST, payload JSON, auth **Sanctum**). Gli endpoint attesi
-  sono già "cablati" in `ApiItineraryRepository`. Completare `apiClient` (token) e un **SyncEngine**
-  che svuota l'**outbox** (`src/core/sync/outbox.ts`). Attivazione via `EXPO_PUBLIC_USE_API=true`.
+### Il passo successivo: scrivere il backend
+Serve una macchina con PHP e Composer. Il lavoro è guidato: `docs/BACKEND.md` è il contratto,
+e i test in `src/core/sync/syncEngine.test.ts` mostrano ogni caso che il server deve
+soddisfare. Ordine consigliato:
+
+1. Progetto Laravel + Sanctum, migrazioni con **chiavi UUID generate dal client** e soft delete.
+2. `/api/auth/*`, poi `/api/sync/pull` (più semplice: una query per intervallo su `updated_at`).
+3. `/api/sync/push` con la tabella di idempotenza e la regola dei conflitti (§4.3).
+4. Policy per i ruoli (un `viewer` non deve poter scrivere, nemmeno via sync).
+5. Endpoint REST per risorsa (§5), che il client usa solo in modalità "solo online".
+
+Poi, dall'app: `.env` con `EXPO_PUBLIC_API_URL` e `EXPO_PUBLIC_USE_API=true`, accesso dalle
+Impostazioni e prima sincronizzazione. **Da provare per primi** i casi che i test coprono ma
+un server vero può smentire: due dispositivi che modificano la stessa tappa, una modifica
+fatta in aereo che parte al ritorno del segnale, e un token scaduto mentre l'app è aperta.
+
+### Quando ci sarà il backend, da rivedere lato app
+- **Il token sta in AsyncStorage, che non è cifrato**: passare a `expo-secure-store`
+  (`src/core/api/tokenStore.ts` è già l'unico punto da toccare).
+- La regola dei conflitti è "vince l'ultima scrittura" per **entità**: se la collaborazione in
+  tempo reale diventa il caso d'uso vero, va ripensata (fusione per campo o CRDT).
+- La UI segnala i conflitti come conteggio: manca una schermata per **rivederli**.
+- I collaboratori sono oggi una lista locale: con gli account diventano inviti veri.
 
 ---
 
@@ -287,3 +339,6 @@ capienza QR, export/import del repository, flusso di import a livello di UI (85 
 4. Schermata **Mappa**: i marker delle tappe ora devono comparire (era il difetto noto della
    Fase 3).
 5. Passa a tema scuro dalle Impostazioni e ricontrolla foglio Condividi, timeline e budget.
+6. **Impostazioni → Account e sincronizzazione** (Fase 5): senza backend configurato deve dire
+   che i dati restano sul dispositivo e quante modifiche sono in coda. Il modulo di accesso
+   compare solo con `EXPO_PUBLIC_USE_API=true`, e per andare oltre serve il server.
