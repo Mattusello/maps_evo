@@ -39,4 +39,8 @@ export const STORAGE_KEYS = {
   outbox: 'mymappa:outbox',
   currentUser: 'mymappa:currentUser',
   settings: 'mymappa:settings',
+  /** Cursore e data dell'ultima sincronizzazione riuscita (Fase 5). */
+  syncState: 'mymappa:syncState',
+  /** Token Sanctum del dispositivo (Fase 5). */
+  authToken: 'mymappa:authToken',
 } as const;
