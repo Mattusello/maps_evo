@@ -18,6 +18,7 @@ import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { AuthProvider } from '@/context/AuthContext';
 import { ItinerariesProvider } from '@/context/ItinerariesContext';
 import { SettingsProvider, useSettings } from '@/context/SettingsContext';
+import { SyncProvider } from '@/context/SyncContext';
 import { ThemeProvider, useTheme } from '@/ui/theme';
 
 SplashScreen.preventAutoHideAsync();
@@ -29,7 +30,11 @@ function ThemedProviders({ children }: { children: ReactNode }) {
     <ThemeProvider preference={themePreference}>
       <BottomSheetModalProvider>
         <AuthProvider>
-          <ItinerariesProvider>{children}</ItinerariesProvider>
+          {/* Sync dopo gli itinerari: quando arrivano dati dal server deve poter
+              chiedere alla lista di rileggersi. */}
+          <ItinerariesProvider>
+            <SyncProvider>{children}</SyncProvider>
+          </ItinerariesProvider>
         </AuthProvider>
       </BottomSheetModalProvider>
     </ThemeProvider>

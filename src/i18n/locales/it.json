@@ -227,6 +227,37 @@
     "language": "Lingua",
     "about": "Informazioni",
     "languageValue": "Italiano",
-    "languageNote": "Per ora l'app parla solo italiano."
+    "languageNote": "Per ora l'app parla solo italiano.",
+    "account": "Account e sincronizzazione"
+  },
+  "sync": {
+    "account": "Account",
+    "localOnly": {
+      "title": "Solo su questo dispositivo",
+      "body": "Gli itinerari sono salvati qui: non vengono caricati da nessuna parte.",
+      "queued_one": "{{count}} modifica in attesa di essere sincronizzata.",
+      "queued_other": "{{count}} modifiche in attesa di essere sincronizzate.",
+      "howTo": "Per sincronizzare e condividere davvero, configura EXPO_PUBLIC_API_URL e EXPO_PUBLIC_USE_API nel file .env."
+    },
+    "signInTitle": "Accedi al tuo account",
+    "signUpTitle": "Crea un account",
+    "name": "Nome",
+    "email": "Email",
+    "password": "Password",
+    "signIn": "Accedi",
+    "signUp": "Crea account",
+    "switchToSignUp": "Non hai un account? Creane uno",
+    "switchToSignIn": "Hai già un account? Accedi",
+    "signInFailed": "Accesso non riuscito: controlla la connessione e riprova.",
+    "lastSync": "Ultima sincronizzazione: {{when}}",
+    "never": "Mai sincronizzato",
+    "upToDate": "Tutto sincronizzato",
+    "pending_one": "{{count}} modifica da inviare",
+    "pending_other": "{{count}} modifiche da inviare",
+    "syncNow": "Sincronizza ora",
+    "signOut": "Esci",
+    "error": "Sincronizzazione non riuscita: le modifiche restano salvate qui e riparte da sola.",
+    "conflicts_one": "{{count}} modifica è stata sovrascritta da una versione più recente.",
+    "conflicts_other": "{{count}} modifiche sono state sovrascritte da versioni più recenti."
   }
 }

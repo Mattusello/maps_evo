@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { ScrollView, StyleSheet, View } from 'react-native';
 
 import { useSettings } from '@/context/SettingsContext';
+import { AccountSyncCard } from '@/features/sync/AccountSyncCard';
 import { Card, Chip, Screen, Text } from '@/ui/components';
 import { spacing, type ThemePreference } from '@/ui/theme';
 
@@ -28,6 +29,10 @@ export default function SettingsScreen() {
               />
             ))}
           </View>
+        </Section>
+
+        <Section title={t('settings.account')}>
+          <AccountSyncCard />
         </Section>
 
         <Section title={t('settings.language')}>

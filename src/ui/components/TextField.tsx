@@ -28,6 +28,9 @@ export const TextField = forwardRef<TextInput, TextFieldProps>(function TextFiel
       ) : null}
       <TextInput
         ref={ref}
+        // L'etichetta è un <Text> accanto al campo: senza questo, uno screen reader
+        // annuncia un campo di testo senza nome.
+        accessibilityLabel={rest.accessibilityLabel ?? label}
         placeholderTextColor={colors.textTertiary}
         style={[
           styles.input,

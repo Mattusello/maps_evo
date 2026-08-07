@@ -18,6 +18,21 @@ export function formatDistance(km: number): string {
   return `${km.toFixed(1).replace('.', ',')} km`;
 }
 
+/**
+ * Data e ora in forma breve (locale it), per informazioni di servizio come "ultima
+ * sincronizzazione". Se la stringa non è una data valida restituisce null: meglio non
+ * mostrare nulla che mostrare "Invalid Date".
+ */
+export function formatDateTimeShort(iso: string): string | null {
+  const date = new Date(iso);
+  if (Number.isNaN(date.getTime())) return null;
+  try {
+    return new Intl.DateTimeFormat('it-IT', { dateStyle: 'short', timeStyle: 'short' }).format(date);
+  } catch {
+    return date.toISOString();
+  }
+}
+
 /** Fascia di prezzo baseline come simboli: 1 → "€", 4 → "€€€€". 0 → gratis. */
 export function priceLevelSymbol(level: PriceLevel): string {
   if (level <= 0) return 'Gratis';
