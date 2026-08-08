@@ -6,10 +6,10 @@
  * direttamente dallo storage.
  */
 import { useFocusEffect, useLocalSearchParams, useRouter } from 'expo-router';
-import { ArrowLeft, Clock, Map } from 'lucide-react-native';
+import { Clock, Map } from 'lucide-react-native';
 import { useCallback, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Pressable, ScrollView, StyleSheet, View } from 'react-native';
+import { ScrollView, StyleSheet, View } from 'react-native';
 
 import type { ItineraryWithDetails, Stop } from '@/core/models';
 import { getItineraryRepository } from '@/core/repositories';
@@ -20,7 +20,7 @@ import { formatDistance } from '@/core/utils/format';
 import { formatClock } from '@/core/utils/time';
 import { DayTimeline } from '@/features/timeline/DayTimeline';
 import { StopScheduleSheet } from '@/features/timeline/StopScheduleSheet';
-import { Button, EmptyState, Screen, Skeleton, Text } from '@/ui/components';
+import { Button, EmptyState, Screen, ScreenHeader, Skeleton, Text } from '@/ui/components';
 import { spacing, useTheme } from '@/ui/theme';
 
 export default function ItineraryTimelineScreen() {
@@ -144,19 +144,11 @@ export default function ItineraryTimelineScreen() {
 
   return (
     <Screen edges={['top']}>
-      <View style={styles.topbar}>
-        <Pressable
-          accessibilityRole="button"
-          accessibilityLabel={t('common.back')}
-          onPress={() => router.back()}
-          hitSlop={10}
-        >
-          <ArrowLeft color={colors.text} size={24} />
-        </Pressable>
-        <Text variant="title3" numberOfLines={1} style={styles.topbarTitle}>
-          {t('timeline.title')}
-        </Text>
-      </View>
+      <ScreenHeader
+        title={t('timeline.title')}
+        backLabel={t('common.back')}
+        onBack={() => router.back()}
+      />
 
       {loading ? (
         <View style={styles.loading}>
@@ -221,14 +213,6 @@ export default function ItineraryTimelineScreen() {
 }
 
 const styles = StyleSheet.create({
-  topbar: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: spacing.md,
-    paddingHorizontal: spacing.lg,
-    paddingVertical: spacing.sm,
-  },
-  topbarTitle: { flex: 1 },
   loading: { padding: spacing.lg, gap: spacing.md },
   content: { padding: spacing.lg, gap: spacing['3xl'], paddingBottom: spacing['5xl'] },
 });

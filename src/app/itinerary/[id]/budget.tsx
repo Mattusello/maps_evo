@@ -4,7 +4,7 @@
  * è proposto come scorciatoia.
  */
 import { useFocusEffect, useLocalSearchParams, useRouter } from 'expo-router';
-import { ArrowLeft, Map, PiggyBank } from 'lucide-react-native';
+import { Map, PiggyBank } from 'lucide-react-native';
 import { useCallback, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Pressable, ScrollView, StyleSheet, View } from 'react-native';
@@ -17,7 +17,7 @@ import { formatMoney } from '@/core/utils/format';
 import { BudgetSummary } from '@/features/budget/BudgetSummary';
 import { CostSheet } from '@/features/budget/CostSheet';
 import { useCategoryColor } from '@/features/stops/category';
-import { Badge, Card, EmptyState, Screen, Skeleton, Text } from '@/ui/components';
+import { Badge, Card, EmptyState, Screen, ScreenHeader, Skeleton, Text } from '@/ui/components';
 import { spacing, useTheme } from '@/ui/theme';
 
 export default function ItineraryBudgetScreen() {
@@ -95,19 +95,11 @@ export default function ItineraryBudgetScreen() {
 
   return (
     <Screen edges={['top']}>
-      <View style={styles.topbar}>
-        <Pressable
-          accessibilityRole="button"
-          accessibilityLabel={t('common.back')}
-          onPress={() => router.back()}
-          hitSlop={10}
-        >
-          <ArrowLeft color={colors.text} size={24} />
-        </Pressable>
-        <Text variant="title3" numberOfLines={1} style={styles.topbarTitle}>
-          {t('budget.title')}
-        </Text>
-      </View>
+      <ScreenHeader
+        title={t('budget.title')}
+        backLabel={t('common.back')}
+        onBack={() => router.back()}
+      />
 
       {loading ? (
         <View style={styles.loading}>
@@ -221,14 +213,6 @@ export default function ItineraryBudgetScreen() {
 }
 
 const styles = StyleSheet.create({
-  topbar: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: spacing.md,
-    paddingHorizontal: spacing.lg,
-    paddingVertical: spacing.sm,
-  },
-  topbarTitle: { flex: 1 },
   loading: { padding: spacing.lg, gap: spacing.md },
   content: { padding: spacing.lg, gap: spacing.xl, paddingBottom: spacing['5xl'] },
   day: { gap: spacing.sm },

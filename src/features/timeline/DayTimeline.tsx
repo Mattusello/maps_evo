@@ -148,7 +148,7 @@ export function DayTimeline({
             </Text>
             <Badge label={t('common.estimated')} />
           </View>
-          {suggestions.map((s) => {
+          {suggestions.map((s, i) => {
             const levelKey =
               s.suggestedLevel === 'basso'
                 ? 'low'
@@ -157,7 +157,14 @@ export function DayTimeline({
                   : 'high';
             const hour = formatClock(s.suggestedHour * 60);
             return (
-              <View key={s.stopId} style={styles.suggestion}>
+              <View
+                key={s.stopId}
+                style={[
+                  styles.suggestion,
+                  // Separatore fra un consiglio e il successivo: senza, due righe con lo
+                  // stesso testo sembravano un unico blocco ripetuto.
+                  i > 0 && [styles.suggestionDivided, { borderTopColor: colors.border }],
+                ]}>
                 <Text variant="footnote" color="textSecondary">
                   {t('timeline.suggestions.body', {
                     title: s.stopTitle,
@@ -167,7 +174,7 @@ export function DayTimeline({
                 </Text>
                 <Button
                   label={t('timeline.suggestions.apply', { hour })}
-                  variant="ghost"
+                  variant="tonal"
                   size="sm"
                   onPress={() => onApplySuggestion(s.stopId, s.suggestedHour)}
                 />
@@ -186,5 +193,8 @@ const styles = StyleSheet.create({
   headerText: { flex: 1, gap: 2 },
   suggestions: { borderRadius: radius.lg, padding: spacing.md, gap: spacing.sm },
   suggestionsHead: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm },
-  suggestion: { gap: spacing.xs },
+  // `flex-start`: l'azione deve avere la larghezza del suo testo. Stesa a tutta riga e con
+  // il label centrato sembrava un titolo, non un pulsante.
+  suggestion: { gap: spacing.sm, alignItems: 'flex-start' },
+  suggestionDivided: { paddingTop: spacing.sm, borderTopWidth: StyleSheet.hairlineWidth },
 });

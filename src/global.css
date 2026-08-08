@@ -19,6 +19,45 @@
     outline-offset: 2px;
   }
 
+  /*
+   * Il ring blu di sistema sui campi di testo non appartiene al design system: sopra la
+   * mappa spiccava come un elemento estraneo. Lo azzeriamo e lasciamo che sia la regola
+   * `:focus-visible` qui sopra a disegnare il focus con il colore d'accento.
+   */
+  input:focus,
+  textarea:focus,
+  select:focus,
+  [contenteditable]:focus {
+    outline: none;
+  }
+
+  /*
+   * Scrollbar discrete (solo web). Quelle di sistema, chiare e spesse, si stampavano
+   * sopra le card delle liste lunghe e rompevano l'illusione della superficie native.
+   */
+  * {
+    scrollbar-width: thin;
+    scrollbar-color: rgb(var(--color-border)) transparent;
+  }
+
+  ::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+
+  ::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    background-color: rgb(var(--color-border));
+    border-radius: 4px;
+  }
+
+  ::-webkit-scrollbar-thumb:hover {
+    background-color: rgb(var(--color-text-tertiary));
+  }
+
   :root {
     --color-background: 247 248 250;
     --color-surface: 255 255 255;

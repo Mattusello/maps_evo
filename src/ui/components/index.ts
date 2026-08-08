@@ -4,6 +4,7 @@ export * from './Card';
 export * from './Badge';
 export * from './Chip';
 export * from './Screen';
+export * from './ScreenHeader';
 export * from './EmptyState';
 export * from './Fab';
 export * from './Skeleton';

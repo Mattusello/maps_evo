@@ -1,6 +1,5 @@
 import { useFocusEffect, useLocalSearchParams, useRouter } from 'expo-router';
 import {
-  ArrowLeft,
   CalendarPlus,
   Clock,
   Map,
@@ -11,15 +10,25 @@ import {
 } from 'lucide-react-native';
 import { useCallback, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Pressable, ScrollView, StyleSheet, View } from 'react-native';
+import { ScrollView, StyleSheet, View } from 'react-native';
 
 import { useAuth } from '@/context/AuthContext';
 import { getItineraryRepository } from '@/core/repositories';
 import type { Collaborator, ItineraryWithDetails } from '@/core/models';
 import { CollaboratorsSheet } from '@/features/sharing/CollaboratorsSheet';
 import { ShareSheet } from '@/features/sharing/ShareSheet';
-import { Badge, Button, Card, EmptyState, Screen, Skeleton, Text } from '@/ui/components';
-import { minTapTarget, spacing, useTheme } from '@/ui/theme';
+import {
+  Badge,
+  Button,
+  Card,
+  EmptyState,
+  HeaderIconButton,
+  Screen,
+  ScreenHeader,
+  Skeleton,
+  Text,
+} from '@/ui/components';
+import { spacing, useTheme } from '@/ui/theme';
 
 export default function ItineraryDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
@@ -64,36 +73,26 @@ export default function ItineraryDetailScreen() {
 
   return (
     <Screen edges={['top']}>
-      <View style={styles.topbar}>
-        <Pressable
-          accessibilityRole="button"
-          accessibilityLabel={t('common.back')}
-          onPress={() => router.back()}
-          hitSlop={10}
-          style={[styles.iconBtn, styles.iconBtnEdge]}>
-          <ArrowLeft color={colors.text} size={24} />
-        </Pressable>
-        {detail ? (
-          <View style={styles.topActions}>
-            <Pressable
-              accessibilityRole="button"
-              accessibilityLabel={t('sharing.collaborators')}
-              onPress={() => setEditingCollaborators(true)}
-              hitSlop={10}
-              style={styles.iconBtn}>
-              <Users color={colors.text} size={22} />
-            </Pressable>
-            <Pressable
-              accessibilityRole="button"
-              accessibilityLabel={t('sharing.title')}
-              onPress={() => setSharing(true)}
-              hitSlop={10}
-              style={styles.iconBtn}>
-              <Share2 color={colors.text} size={22} />
-            </Pressable>
-          </View>
-        ) : null}
-      </View>
+      <ScreenHeader
+        backLabel={t('common.back')}
+        onBack={() => router.back()}
+        actions={
+          detail ? (
+            <>
+              <HeaderIconButton
+                accessibilityLabel={t('sharing.collaborators')}
+                onPress={() => setEditingCollaborators(true)}>
+                <Users color={colors.text} size={22} />
+              </HeaderIconButton>
+              <HeaderIconButton
+                accessibilityLabel={t('sharing.title')}
+                onPress={() => setSharing(true)}>
+                <Share2 color={colors.text} size={22} />
+              </HeaderIconButton>
+            </>
+          ) : null
+        }
+      />
 
       <ScrollView contentContainerStyle={styles.content}>
         {loading && !detail ? (
@@ -217,22 +216,6 @@ function ActionTile({
 }
 
 const styles = StyleSheet.create({
-  topbar: {
-    paddingHorizontal: spacing.lg,
-    paddingVertical: spacing.sm,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-  },
-  topActions: { flexDirection: 'row', gap: spacing.xs, marginRight: -spacing.md },
-  // Tap target pieno (48) senza perdere l'allineamento ottico col contenuto sotto.
-  iconBtn: {
-    width: minTapTarget,
-    height: minTapTarget,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  iconBtnEdge: { marginLeft: -spacing.md },
   content: { padding: spacing.lg, gap: spacing.xl, paddingBottom: spacing['4xl'] },
   head: { gap: spacing.sm },
   badges: { flexDirection: 'row', gap: spacing.sm, flexWrap: 'wrap', marginTop: spacing.xs },

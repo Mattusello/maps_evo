@@ -6,10 +6,10 @@
  * qualcosa mostra sempre un'**anteprima**: l'utente vede cosa sta aggiungendo.
  */
 import { useLocalSearchParams, useRouter } from 'expo-router';
-import { ArrowLeft, ClipboardPaste, Check, QrCode, TriangleAlert } from 'lucide-react-native';
+import { ClipboardPaste, Check, QrCode, TriangleAlert } from 'lucide-react-native';
 import { useCallback, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Pressable, ScrollView, StyleSheet, View } from 'react-native';
+import { ScrollView, StyleSheet, View } from 'react-native';
 
 import { useItineraries } from '@/context/ItinerariesContext';
 import {
@@ -19,7 +19,7 @@ import {
   type SharedItinerary,
 } from '@/core/sharing/shareCode';
 import { readClipboard } from '@/features/sharing/shareActions';
-import { Badge, Button, Card, Screen, Text, TextField } from '@/ui/components';
+import { Badge, Button, Card, Screen, ScreenHeader, Text, TextField } from '@/ui/components';
 import { radius, spacing, useTheme } from '@/ui/theme';
 
 export default function ImportScreen() {
@@ -83,15 +83,7 @@ export default function ImportScreen() {
 
   return (
     <Screen edges={['top']}>
-      <View style={styles.topbar}>
-        <Pressable
-          accessibilityRole="button"
-          accessibilityLabel={t('common.back')}
-          onPress={close}
-          hitSlop={10}>
-          <ArrowLeft color={colors.text} size={24} />
-        </Pressable>
-      </View>
+      <ScreenHeader backLabel={t('common.back')} onBack={close} />
 
       <ScrollView contentContainerStyle={styles.content} keyboardShouldPersistTaps="handled">
         <View style={styles.head}>
@@ -195,7 +187,6 @@ export default function ImportScreen() {
 }
 
 const styles = StyleSheet.create({
-  topbar: { paddingHorizontal: spacing.lg, paddingVertical: spacing.sm },
   content: { padding: spacing.lg, gap: spacing.xl, paddingBottom: spacing['4xl'] },
   head: { gap: spacing.sm },
   medallion: {
