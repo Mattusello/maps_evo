@@ -6,6 +6,7 @@ import {
   MapPinned,
   PiggyBank,
   Share2,
+  Trash2,
   Users,
 } from 'lucide-react-native';
 import { useCallback, useMemo, useState } from 'react';
@@ -13,6 +14,7 @@ import { useTranslation } from 'react-i18next';
 import { ScrollView, StyleSheet, View } from 'react-native';
 
 import { useAuth } from '@/context/AuthContext';
+import { useItineraries } from '@/context/ItinerariesContext';
 import { getItineraryRepository } from '@/core/repositories';
 import type { Collaborator, ItineraryWithDetails } from '@/core/models';
 import { CollaboratorsSheet } from '@/features/sharing/CollaboratorsSheet';
@@ -21,6 +23,7 @@ import {
   Badge,
   Button,
   Card,
+  ConfirmSheet,
   EmptyState,
   HeaderIconButton,
   Screen,
@@ -36,12 +39,14 @@ export default function ItineraryDetailScreen() {
   const router = useRouter();
   const { colors } = useTheme();
   const { user } = useAuth();
+  const { deleteItinerary } = useItineraries();
   const repo = useMemo(() => getItineraryRepository(), []);
 
   const [detail, setDetail] = useState<ItineraryWithDetails | null>(null);
   const [loading, setLoading] = useState(true);
   const [sharing, setSharing] = useState(false);
   const [editingCollaborators, setEditingCollaborators] = useState(false);
+  const [confirmingDelete, setConfirmingDelete] = useState(false);
 
   const load = useCallback(async () => {
     if (!id) return;
@@ -69,6 +74,17 @@ export default function ItineraryDetailScreen() {
     await load();
   };
 
+  /**
+   * L'eliminazione passa dal context, non dal repository: così la lista si aggiorna da sola
+   * invece di scoprire alla prossima lettura che l'itinerario non c'è più.
+   */
+  const confirmDelete = async () => {
+    if (!id) return;
+    setConfirmingDelete(false);
+    await deleteItinerary(id);
+    router.back();
+  };
+
   const stopCount = detail?.days.reduce((n, d) => n + d.stops.length, 0) ?? 0;
 
   return (
@@ -88,6 +104,11 @@ export default function ItineraryDetailScreen() {
                 accessibilityLabel={t('sharing.title')}
                 onPress={() => setSharing(true)}>
                 <Share2 color={colors.text} size={22} />
+              </HeaderIconButton>
+              <HeaderIconButton
+                accessibilityLabel={t('itineraries.delete.accessibility')}
+                onPress={() => setConfirmingDelete(true)}>
+                <Trash2 color={colors.danger} size={22} />
               </HeaderIconButton>
             </>
           ) : null
@@ -189,6 +210,15 @@ export default function ItineraryDetailScreen() {
         collaborators={detail?.collaborators ?? []}
         currentUserId={user?.id ?? 'local'}
         onChange={saveCollaborators}
+      />
+      <ConfirmSheet
+        open={confirmingDelete}
+        title={t('itineraries.delete.title', { title: detail?.title ?? '' })}
+        body={t('itineraries.delete.body')}
+        confirmLabel={t('itineraries.delete.confirm')}
+        destructive
+        onConfirm={confirmDelete}
+        onCancel={() => setConfirmingDelete(false)}
       />
     </Screen>
   );

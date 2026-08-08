@@ -53,7 +53,14 @@
     "count_one": "{{count}} itinerario",
     "count_other": "{{count}} itinerari",
     "dayEmpty": "Nessuna tappa in questo giorno.",
-    "addDay": "Aggiungi un giorno"
+    "addDay": "Aggiungi un giorno",
+    "delete": {
+      "action": "Elimina",
+      "accessibility": "Elimina itinerario",
+      "title": "Eliminare «{{title}}»?",
+      "body": "Spariscono anche i giorni, le tappe e i prezzi che hai segnalato. Non si può annullare.",
+      "confirm": "Elimina itinerario"
+    }
   },
   "stop": {
     "openNow": "Aperto",

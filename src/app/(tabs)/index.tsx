@@ -1,21 +1,43 @@
 import { useRouter } from 'expo-router';
 import { MapPinned, Plus, QrCode } from 'lucide-react-native';
+import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { FlatList, Pressable, RefreshControl, StyleSheet, View } from 'react-native';
 
 import { useItineraries } from '@/context/ItinerariesContext';
+import type { Itinerary } from '@/core/models';
 import { ItineraryCard } from '@/features/itineraries/components/ItineraryCard';
-import { Button, EmptyState, Fab, Screen, Skeleton, Text } from '@/ui/components';
+import {
+  Button,
+  ConfirmSheet,
+  EmptyState,
+  Fab,
+  Screen,
+  Skeleton,
+  SwipeableRow,
+  Text,
+} from '@/ui/components';
 import { minTapTarget, spacing, useTheme } from '@/ui/theme';
 
 export default function ItinerariesScreen() {
   const { t } = useTranslation();
   const router = useRouter();
   const { colors } = useTheme();
-  const { itineraries, loading, error, refresh } = useItineraries();
+  const { itineraries, loading, error, refresh, deleteItinerary } = useItineraries();
+
+  // L'itinerario in attesa di conferma. Lo teniamo intero, non solo l'id: serve il titolo
+  // nella domanda, e la card sotto potrebbe già essere sparita dalla lista.
+  const [pendingDelete, setPendingDelete] = useState<Itinerary | null>(null);
 
   const openNew = () => router.push('/itinerary/new');
   const openImport = () => router.push('/import');
+
+  const confirmDelete = async () => {
+    if (!pendingDelete) return;
+    const target = pendingDelete;
+    setPendingDelete(null);
+    await deleteItinerary(target.id);
+  };
 
   return (
     <Screen edges={['top']}>
@@ -60,14 +82,28 @@ export default function ItinerariesScreen() {
             <RefreshControl refreshing={loading} onRefresh={refresh} tintColor={colors.primary} />
           }
           renderItem={({ item }) => (
-            <ItineraryCard
-              itinerary={item}
-              dayCount={item.dayIds.length}
-              onPress={() => router.push(`/itinerary/${item.id}`)}
-            />
+            <SwipeableRow
+              actionLabel={t('itineraries.delete.action')}
+              onAction={() => setPendingDelete(item)}>
+              <ItineraryCard
+                itinerary={item}
+                dayCount={item.dayIds.length}
+                onPress={() => router.push(`/itinerary/${item.id}`)}
+              />
+            </SwipeableRow>
           )}
         />
       )}
+
+      <ConfirmSheet
+        open={pendingDelete !== null}
+        title={t('itineraries.delete.title', { title: pendingDelete?.title ?? '' })}
+        body={t('itineraries.delete.body')}
+        confirmLabel={t('itineraries.delete.confirm')}
+        destructive
+        onConfirm={confirmDelete}
+        onCancel={() => setPendingDelete(null)}
+      />
 
       {error ? (
         <Text variant="footnote" color="danger" style={styles.error}>
