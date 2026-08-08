@@ -8,10 +8,11 @@
     "scheme": "mymappa",
     "userInterfaceStyle": "automatic",
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "bundleIdentifier": "com.mymappa.app"
     },
     "android": {
-      "edgeToEdgeEnabled": true,
+      "package": "com.mymappa.app",
       "predictiveBackGestureEnabled": true,
       "adaptiveIcon": {
         "backgroundColor": "#E7E5FF",
