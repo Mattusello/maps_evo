@@ -23,6 +23,12 @@ export type MapCanvasProps = {
   onMapPress?: (loc: { lat: number; lng: number }) => void;
   /** Chiamata al tap su un marker. */
   onMarkerPress?: (id: string) => void;
+  /**
+   * Centro corrente della mappa a fine spostamento: serve a orientare la ricerca POI
+   * sull'area che l'utente sta guardando. NON va reinviato come `center`, o la mappa
+   * si riposizionerebbe da sola a ogni pan.
+   */
+  onCenterChange?: (loc: { lat: number; lng: number }) => void;
   style?: StyleProp<ViewStyle>;
 };
 
@@ -30,4 +36,5 @@ export type MapCanvasProps = {
 export type MapOutMessage =
   | { type: 'ready' }
   | { type: 'mapPress'; lat: number; lng: number }
-  | { type: 'markerPress'; id: string };
+  | { type: 'markerPress'; id: string }
+  | { type: 'centerChange'; lat: number; lng: number };

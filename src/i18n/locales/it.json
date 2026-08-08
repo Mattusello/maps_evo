@@ -93,6 +93,7 @@
   },
   "map": {
     "searchPlaceholder": "Cerca un luogo…",
+    "searchFailed": "Ricerca non disponibile: riprova tra poco.",
     "customStop": "Punto sulla mappa",
     "tapHint": "Tocca la mappa per aggiungere una tappa",
     "title": "Mappa"

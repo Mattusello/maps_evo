@@ -24,12 +24,34 @@ export type PoiSuggestion = {
   address?: string;
 };
 
+/**
+ * Fonte non raggiungibile o risposta non valida. Distingue "il servizio ha fallito"
+ * da "nessun risultato" (lista vuota / null), che la UI deve mostrare in modo diverso.
+ */
+export class PoiProviderError extends Error {
+  constructor(
+    readonly status: number,
+    readonly detail: string
+  ) {
+    super(`POI provider: ${status} ${detail}`);
+    this.name = 'PoiProviderError';
+  }
+}
+
 export interface PoiProvider {
-  /** Autocomplete/ricerca testuale di luoghi. */
+  /**
+   * Autocomplete/ricerca testuale di luoghi.
+   * `near` sposta i risultati verso quell'area (senza, la fonte cerca nel mondo intero).
+   * @throws PoiProviderError se la fonte risponde con un errore.
+   */
   search(query: string, opts?: { near?: Location; limit?: number; signal?: AbortSignal }): Promise<PoiSuggestion[]>;
   /** Dettagli completi di un luogo (quando disponibili dalla fonte). */
   details(placeId: string): Promise<Poi | null>;
-  /** Geocoding inverso: dal punto toccato sulla mappa al luogo più vicino. */
+  /**
+   * Geocoding inverso: dal punto toccato sulla mappa al luogo più vicino.
+   * null = nessun luogo noto in quel punto.
+   * @throws PoiProviderError se la fonte risponde con un errore.
+   */
   reverseGeocode(location: Location): Promise<PoiSuggestion | null>;
 }
 

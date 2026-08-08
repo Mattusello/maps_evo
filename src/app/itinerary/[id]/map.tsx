@@ -14,7 +14,7 @@ import type { MapMarker } from '@/features/map/MapCanvas.types';
 import { PoiSearchBar } from '@/features/map/PoiSearchBar';
 import { mapCategoryColor } from '@/features/stops/category';
 import { StopDetailSheet } from '@/features/stops/StopDetailSheet';
-import { elevation, spacing, useTheme } from '@/ui/theme';
+import { elevation, minTapTarget, spacing, useTheme } from '@/ui/theme';
 
 export default function ItineraryMapScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
@@ -58,7 +58,14 @@ export default function ItineraryMapScreen() {
   );
 
   const selectedStop = stops.find((s) => s.id === selectedStopId) ?? null;
-  const near: Location | undefined = stops[0]?.location;
+
+  // La mappa è centrata sulla prima tappa; finché l'itinerario è vuoto quel riferimento non
+  // esiste e la ricerca cercherebbe nel mondo intero ("fav" → Favreuil, Francia). In quel caso
+  // usiamo l'area che l'utente sta guardando. Il centro live NON torna nella prop `center`:
+  // rimanderebbe la mappa al punto di partenza a ogni pan.
+  const [mapCenter, setMapCenter] = useState<Location | null>(null);
+  const firstStop: Location | undefined = stops[0]?.location;
+  const searchNear: Location | undefined = firstStop ?? mapCenter ?? undefined;
 
   /** Garantisce l'esistenza di un giorno e restituisce l'id dell'ultimo. */
   const ensureDayId = useCallback(async (): Promise<string> => {
@@ -84,8 +91,14 @@ export default function ItineraryMapScreen() {
 
   const addAtPoint = useCallback(
     async (loc: Location) => {
-      // Geocoding inverso per dare un nome sensato al punto toccato.
-      const found = await getPoiProvider().reverseGeocode(loc);
+      // Geocoding inverso per dare un nome sensato al punto toccato. Se la fonte non risponde
+      // la tappa si aggiunge comunque con un nome generico: il tap non deve mai andare perso.
+      let found: PoiSuggestion | null = null;
+      try {
+        found = await getPoiProvider().reverseGeocode(loc);
+      } catch (e) {
+        console.warn('[map] reverse geocoding fallito', e);
+      }
       await addStop(found ?? { placeId: `pt${loc.lat},${loc.lng}`, name: t('map.customStop'), category: 'altro', location: loc });
     },
     [addStop, t]
@@ -105,13 +118,16 @@ export default function ItineraryMapScreen() {
       <MapCanvas
         markers={markers}
         routeColor={colors.primary}
-        center={near}
+        center={firstStop}
         onMapPress={addAtPoint}
         onMarkerPress={setSelectedStopId}
+        onCenterChange={setMapCenter}
         style={StyleSheet.absoluteFill}
       />
 
-      {/* Overlay in alto: back + ricerca */}
+      {/* Overlay in alto: back + ricerca. `insets.top + spacing.sm` è lo stesso offset che
+          `ScreenHeader` applica nelle altre schermate: con il pulsante alto quanto il tap
+          target il Indietro cade esattamente alla stessa altezza ovunque. */}
       <View style={[styles.overlay, { top: insets.top + spacing.sm }]} pointerEvents="box-none">
         <View style={styles.topRow} pointerEvents="box-none">
           <Pressable
@@ -119,10 +135,10 @@ export default function ItineraryMapScreen() {
             accessibilityLabel={t('common.back')}
             onPress={() => router.back()}
             style={[styles.backBtn, { backgroundColor: colors.surface }, elevation.md]}>
-            <ArrowLeft color={colors.text} size={22} />
+            <ArrowLeft color={colors.text} size={24} />
           </Pressable>
         </View>
-        <PoiSearchBar near={near} onSelect={addStop} />
+        <PoiSearchBar near={searchNear} onSelect={addStop} />
       </View>
 
       <StopDetailSheet
@@ -138,12 +154,14 @@ export default function ItineraryMapScreen() {
 
 const styles = StyleSheet.create({
   root: { flex: 1 },
-  overlay: { position: 'absolute', left: spacing.lg, right: spacing.lg, gap: spacing.sm },
+  overlay: { position: 'absolute', left: spacing.lg, right: spacing.lg, gap: spacing.md },
   topRow: { flexDirection: 'row' },
+  // Qui il Indietro ha una superficie propria (sta sopra la mappa): è il bordo del cerchio
+  // ad allinearsi al contenuto, non l'icona. Le misure restano quelle del tap target.
   backBtn: {
-    width: 44,
-    height: 44,
-    borderRadius: 22,
+    width: minTapTarget,
+    height: minTapTarget,
+    borderRadius: minTapTarget / 2,
     alignItems: 'center',
     justifyContent: 'center',
   },

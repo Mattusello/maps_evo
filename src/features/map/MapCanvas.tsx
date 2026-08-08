@@ -16,6 +16,7 @@ export function MapCanvas({
   center,
   onMapPress,
   onMarkerPress,
+  onCenterChange,
   style,
 }: MapCanvasProps) {
   const ref = useRef<WebView>(null);
@@ -45,9 +46,11 @@ export function MapCanvas({
         onMapPress?.({ lat: msg.lat, lng: msg.lng });
       } else if (msg.type === 'markerPress') {
         onMarkerPress?.(msg.id);
+      } else if (msg.type === 'centerChange') {
+        onCenterChange?.({ lat: msg.lat, lng: msg.lng });
       }
     },
-    [send, onMapPress, onMarkerPress]
+    [send, onMapPress, onMarkerPress, onCenterChange]
   );
 
   return (

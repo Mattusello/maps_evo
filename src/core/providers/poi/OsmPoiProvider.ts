@@ -8,10 +8,15 @@
  * volumi contenuti in sviluppo).
  */
 import type { Location, Poi } from '../../models';
-import type { PoiProvider, PoiSuggestion } from '../contracts';
+import { PoiProviderError, type PoiProvider, type PoiSuggestion } from '../contracts';
 import { mapOsmToCategory } from './osmCategory';
 
 const PHOTON_BASE = 'https://photon.komoot.io';
+/**
+ * Photon accetta solo `default | de | en | fr`: con `lang=it` risponde 400.
+ * `default` restituisce il nome nella lingua locale del posto (in Italia: italiano).
+ */
+const PHOTON_LANG = 'default';
 
 type PhotonFeature = {
   geometry: { coordinates: [number, number] };
@@ -45,6 +50,12 @@ function toSuggestion(f: PhotonFeature): PoiSuggestion | null {
   };
 }
 
+/** Trasforma una risposta HTTP non-ok in un PoiProviderError con il messaggio della fonte. */
+async function fail(res: Response): Promise<never> {
+  const body = await res.text().catch(() => '');
+  throw new PoiProviderError(res.status, body.slice(0, 300));
+}
+
 export class OsmPoiProvider implements PoiProvider {
   async search(
     query: string,
@@ -52,13 +63,13 @@ export class OsmPoiProvider implements PoiProvider {
   ): Promise<PoiSuggestion[]> {
     const q = query.trim();
     if (q.length < 2) return [];
-    const params = new URLSearchParams({ q, lang: 'it', limit: String(opts?.limit ?? 8) });
+    const params = new URLSearchParams({ q, lang: PHOTON_LANG, limit: String(opts?.limit ?? 8) });
     if (opts?.near) {
       params.set('lat', String(opts.near.lat));
       params.set('lon', String(opts.near.lng));
     }
     const res = await fetch(`${PHOTON_BASE}/api/?${params.toString()}`, { signal: opts?.signal });
-    if (!res.ok) return [];
+    if (!res.ok) await fail(res);
     const data = (await res.json()) as { features?: PhotonFeature[] };
     return (data.features ?? []).map(toSuggestion).filter((s): s is PoiSuggestion => s !== null);
   }
@@ -67,10 +78,10 @@ export class OsmPoiProvider implements PoiProvider {
     const params = new URLSearchParams({
       lat: String(location.lat),
       lon: String(location.lng),
-      lang: 'it',
+      lang: PHOTON_LANG,
     });
     const res = await fetch(`${PHOTON_BASE}/reverse/?${params.toString()}`);
-    if (!res.ok) return null;
+    if (!res.ok) await fail(res);
     const data = (await res.json()) as { features?: PhotonFeature[] };
     const first = data.features?.[0];
     if (!first) return null;

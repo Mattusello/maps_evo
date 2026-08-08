@@ -15,6 +15,7 @@ export function MapCanvas({
   center,
   onMapPress,
   onMarkerPress,
+  onCenterChange,
   style,
 }: MapCanvasProps) {
   const ref = useRef<HTMLIFrameElement>(null);
@@ -47,11 +48,13 @@ export function MapCanvas({
         onMapPress?.({ lat: msg.lat, lng: msg.lng });
       } else if (msg.type === 'markerPress') {
         onMarkerPress?.(msg.id);
+      } else if (msg.type === 'centerChange') {
+        onCenterChange?.({ lat: msg.lat, lng: msg.lng });
       }
     }
     window.addEventListener('message', onMessage);
     return () => window.removeEventListener('message', onMessage);
-  }, [onMapPress, onMarkerPress, send]);
+  }, [onMapPress, onMarkerPress, onCenterChange, send]);
 
   useEffect(() => {
     if (ready.current) send();

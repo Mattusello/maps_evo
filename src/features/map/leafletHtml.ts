@@ -6,6 +6,7 @@
  * Protocollo messaggi:
  *  - app → mappa: { type:'setData', markers, route:[[lat,lng]], routeColor, center, fit }
  *  - mappa → app: { type:'ready' } | { type:'mapPress', lat, lng } | { type:'markerPress', id }
+ *                 | { type:'centerChange', lat, lng }
  *
  * Nota: attribuzione OSM obbligatoria. Le tile OSM pubbliche hanno limiti d'uso: ok per
  * sviluppo/MVP, in produzione conviene un provider di tile dedicato.
@@ -28,6 +29,9 @@ export function buildLeafletHtml(): string {
   }
   .pin > span { transform: rotate(45deg); color:#fff; font-size:13px; font-family: -apple-system, Roboto, sans-serif; }
   .leaflet-container { font-family: -apple-system, Roboto, sans-serif; }
+  /* I controlli stanno in basso a destra: in alto a sinistra finivano sotto il pulsante
+     Indietro dell'app, che ne copriva metà. Il margine li stacca dall'attribuzione. */
+  .leaflet-bottom.leaflet-right .leaflet-control-zoom { margin-bottom: 26px; }
 </style>
 </head>
 <body>
@@ -39,7 +43,8 @@ export function buildLeafletHtml(): string {
     else if (window.parent && window.parent !== window) { window.parent.postMessage(s, '*'); }
   }
 
-  var map = L.map('map', { zoomControl: true, attributionControl: true }).setView([41.9028, 12.4964], 12);
+  var map = L.map('map', { zoomControl: false, attributionControl: true }).setView([41.9028, 12.4964], 12);
+  L.control.zoom({ position: 'bottomright' }).addTo(map);
   L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
     maxZoom: 19,
     attribution: '&copy; OpenStreetMap'
@@ -49,6 +54,11 @@ export function buildLeafletHtml(): string {
   var routeLayer = L.layerGroup().addTo(map);
 
   map.on('click', function(e){ post({ type:'mapPress', lat:e.latlng.lat, lng:e.latlng.lng }); });
+  // A fine pan/zoom comunica il centro: l'app lo usa per orientare la ricerca POI.
+  map.on('moveend', function(){
+    var c = map.getCenter();
+    post({ type:'centerChange', lat:c.lat, lng:c.lng });
+  });
 
   function makeIcon(color, index){
     var label = index > 0 ? String(index) : '';
