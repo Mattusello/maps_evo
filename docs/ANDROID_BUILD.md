@@ -1,4 +1,4 @@
-# Generare un APK di MyMappa installabile su qualsiasi Android
+# Generare un APK di mapsEvo installabile su qualsiasi Android
 
 L'APK prodotto qui è **autonomo**: contiene il bundle JavaScript, quindi funziona senza PC
 acceso, senza Metro e senza Expo Go. Si installa su qualunque dispositivo con **Android 7

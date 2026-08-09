@@ -1,7 +1,7 @@
 /**
  * MOTION — regole di movimento del sistema.
  *
- * Tesi: il movimento in MyMappa si comporta come un mezzo che **arriva a una fermata**.
+ * Tesi: il movimento in mapsEvo si comporta come un mezzo che **arriva a una fermata**.
  * Entra deciso e si ferma netto (decelerazione, mai rimbalzo), esce più in fretta di quanto
  * è entrato. Serve a spiegare stato e continuità, non a decorare: un solo momento
  * "d'autore" per superficie (in Fase 4 è l'arrivo del QR nel foglio Condividi), tutto il

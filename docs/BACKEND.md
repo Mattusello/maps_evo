@@ -1,4 +1,4 @@
-# MyMappa — Contratto del backend (Laravel)
+# mapsEvo — Contratto del backend (Laravel)
 
 Questo documento è il **contratto** tra l'app e il backend: chi implementa il server ha qui
 tutto ciò che il client si aspetta, senza dover leggere il codice dell'app. Il client di

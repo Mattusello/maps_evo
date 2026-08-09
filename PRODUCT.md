@@ -16,7 +16,7 @@ l'itinerario), altri sono partecipanti che consultano e contribuiscono (prezzi r
 
 ## Product Purpose
 
-MyMappa permette di **creare, organizzare e condividere itinerari di viaggio** con, per ogni
+mapsEvo permette di **creare, organizzare e condividere itinerari di viaggio** con, per ogni
 tappa, informazioni operative su **orari/disponibilità, prezzi e affollamento previsto**.
 Migliora l'esperienza di Google My Maps rendendola incentrata sul viaggio: non solo mappe con
 segnaposto, ma una **timeline con orari**, un **budget**, l'**ottimizzazione del percorso** e
@@ -57,7 +57,7 @@ banalmente.
 
 ## Brand Commitments
 
-- **Nome**: MyMappa (nome di lavoro, inferito). *[da confermare]*
+- **Nome**: mapsEvo (nome di lavoro, inferito). *[da confermare]*
 - **Voce**: pratica, chiara, incoraggiante ma mai chiassosa; da compagno di viaggio competente.
 - Nessun logo o asset di brand fornito finora. *[assente — non inventare come reale]*
 

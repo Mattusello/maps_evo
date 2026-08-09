@@ -1,4 +1,4 @@
-# Installare MyMappa su iPhone senza Apple Developer Program
+# Installare mapsEvo su iPhone senza Apple Developer Program
 
 Piano operativo per la strada **"Mac una volta sola, poi Windows"**: il Mac serve solo per
 produrre l'`.ipa`; da lì in avanti l'installazione e i rinnovi settimanali si fanno da Windows
@@ -66,8 +66,8 @@ vorrà dire rifare i passi 3 e 4 su un Mac.
 ## Passo 2 — Portare il progetto sul Mac
 
 ```bash
-git clone https://github.com/Mattusello/maps_evo.git mymappa
-cd mymappa
+git clone https://github.com/Mattusello/maps_evo.git maps_evo
+cd maps_evo
 git checkout staging              # il ramo di lavoro corrente
 npm ci
 ```
@@ -91,7 +91,7 @@ Prima di impacchettare conviene provare che compili e funzioni:
 
 1. Sull'iPhone: **Impostazioni → Privacy e sicurezza → Modalità sviluppatore** → attiva e riavvia.
 2. Collega l'iPhone al Mac via cavo e concedi *Autorizza* quando lo chiede.
-3. Apri `ios/MyMappa.xcworkspace` in Xcode, seleziona il target **MyMappa** →
+3. Apri `ios/mapsEvo.xcworkspace` in Xcode, seleziona il target **mapsEvo** →
    **Signing & Capabilities** → *Team*: scegli il tuo **Personal Team** (l'Apple ID gratuito).
    Se Xcode segnala che il bundle identifier è già usato, cambialo aggiungendo un suffisso
    (es. `com.mymappa.app.matti`) e riporta la stessa modifica in `app.json`.
@@ -115,8 +115,8 @@ firma e si impacchetta a mano.
 ```bash
 cd ios
 
-xcodebuild -workspace MyMappa.xcworkspace \
-  -scheme MyMappa \
+xcodebuild -workspace mapsEvo.xcworkspace \
+  -scheme mapsEvo \
   -configuration Release \
   -sdk iphoneos \
   -derivedDataPath build \
@@ -125,15 +125,15 @@ xcodebuild -workspace MyMappa.xcworkspace \
 
 cd build/Build/Products/Release-iphoneos
 mkdir -p Payload
-cp -R MyMappa.app Payload/
-zip -r ~/Desktop/MyMappa.ipa Payload
+cp -R mapsEvo.app Payload/
+zip -r ~/Desktop/mapsEvo.ipa Payload
 ```
 
 La struttura `Payload/NomeApp.app` dentro uno zip rinominato `.ipa` è esattamente ciò che
-AltStore si aspetta. Se il nome dello schema o dell'`.app` non fosse `MyMappa`, guarda il
+AltStore si aspetta. Se il nome dello schema o dell'`.app` non fosse `mapsEvo`, guarda il
 contenuto di `ios/` e di `Release-iphoneos/` e usa quello che trovi.
 
-Copia `MyMappa.ipa` su Windows (cloud, chiavetta, quello che preferisci). **Da qui il Mac non
+Copia `mapsEvo.ipa` su Windows (cloud, chiavetta, quello che preferisci). **Da qui il Mac non
 serve più**, finché non cambi dipendenze o configurazione nativa.
 
 ## Passo 6 — Installare da Windows con AltServer
@@ -148,7 +148,7 @@ serve più**, finché non cambi dipendenze o configurazione nativa.
 5. Sull'iPhone: **Impostazioni → Generali → VPN e gestione dispositivo** → fidati del profilo
    appena installato.
 6. Apri **AltStore** sull'iPhone → **My Apps** → **+** in alto a sinistra → scegli
-   `MyMappa.ipa`. L'installazione richiede qualche minuto.
+   `mapsEvo.ipa`. L'installazione richiede qualche minuto.
 
 ## Passo 7 — Tenere viva l'app (ogni 7 giorni)
 

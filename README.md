@@ -1,4 +1,4 @@
-# MyMappa
+# mapsEvo
 
 App mobile cross-platform (iOS + Android) per **creare, organizzare e condividere itinerari di
 viaggio**. Per ogni tappa: orari/disponibilità, fascia di prezzo (baseline Google + prezzi reali

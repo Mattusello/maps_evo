@@ -1,10 +1,10 @@
-# Design — MyMappa
+# Design — mapsEvo
 
 <!-- impeccable:design-schema 1 -->
 
 ## Contratto di direzione
 
-**THESIS.** MyMappa è un sistema di *segnaletica di viaggio*: il percorso ordinato di tappe —
+**THESIS.** mapsEvo è un sistema di *segnaletica di viaggio*: il percorso ordinato di tappe —
 il meccanismo stesso del prodotto — diventa il linguaggio visivo. Rifiuta la mappa-con-spilli
 generica e l'estetica "app di viaggio blu/teal + card tutte uguali".
 

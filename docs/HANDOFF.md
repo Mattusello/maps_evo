@@ -1,4 +1,4 @@
-# MyMappa — Documento di Handoff (Fasi 1 → 5)
+# mapsEvo — Documento di Handoff (Fasi 1 → 5)
 
 Documento per **riprendere il progetto** in un secondo momento: resta da scrivere il backend
 Laravel vero, seguendo il contratto in [`BACKEND.md`](BACKEND.md).

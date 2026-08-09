@@ -1,6 +1,6 @@
 {
   "expo": {
-    "name": "MyMappa",
+    "name": "mapsEvo",
     "slug": "mymappa",
     "version": "1.0.0",
     "orientation": "portrait",
@@ -44,6 +44,13 @@
     "experiments": {
       "typedRoutes": true,
       "reactCompiler": true
-    }
+    },
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "2ccfdf52-64d1-4d28-b728-4b33ad883221"
+      }
+    },
+    "owner": "mattusello"
   }
 }

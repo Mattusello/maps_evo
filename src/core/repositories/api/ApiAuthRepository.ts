@@ -19,7 +19,7 @@ import { LocalAuthRepository } from '../local/LocalAuthRepository';
 type SessionResponse = { token: string; user: AuthUser };
 
 /** Nome con cui il token compare nella lista dei dispositivi dell'utente. */
-const DEVICE_NAME = 'MyMappa';
+const DEVICE_NAME = 'mapsEvo';
 
 export class ApiAuthRepository implements RemoteAuthRepository {
   constructor(

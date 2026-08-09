@@ -1,5 +1,5 @@
 /**
- * PALETTE — fonte di verità dei colori di MyMappa.
+ * PALETTE — fonte di verità dei colori di mapsEvo.
  *
  * Mondo visivo: "Segnaletica / Wayfinding". Fondo neutro e spazioso + un accento
  * "route" indaco elettrico che porta linee-percorso, marker e azioni primarie.
