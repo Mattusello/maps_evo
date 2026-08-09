@@ -1,11 +1,11 @@
 /**
  * ThemeProvider: calcola lo schema attivo (light/dark) incrociando lo schema di sistema
- * con la preferenza utente ('light' | 'dark' | 'system'), espone la palette semantica attiva
- * ai consumatori JS e mantiene allineato NativeWind (per le classi `dark:`).
+ * con la preferenza utente ('light' | 'dark' | 'system') ed espone la palette semantica
+ * attiva ai consumatori JS. È l'unica fonte di colore dell'app: NativeWind è stato rimosso
+ * (vedi babel.config.js) e nessun componente usa `className`.
  */
-import { createContext, useContext, useEffect, useMemo, type ReactNode } from 'react';
+import { createContext, useContext, useMemo, type ReactNode } from 'react';
 import { useColorScheme as useRNColorScheme } from 'react-native';
-import { colorScheme as nwColorScheme } from 'nativewind';
 
 import { palettes, type ColorScheme, type SemanticColors } from './palette';
 import { elevation, radius, spacing, typography } from './tokens';
@@ -34,12 +34,6 @@ export function ThemeProvider({
   // non è 'dark' lo trattiamo come 'light'.
   const systemScheme: ColorScheme = useRNColorScheme() === 'dark' ? 'dark' : 'light';
   const scheme: ColorScheme = preference === 'system' ? systemScheme : preference;
-
-  // Tiene NativeWind allineato allo schema calcolato, così `dark:` in className
-  // e `useTheme()` in JS non divergono mai.
-  useEffect(() => {
-    nwColorScheme.set(preference);
-  }, [preference]);
 
   const value = useMemo<ThemeContextValue>(
     () => ({ scheme, colors: palettes[scheme], spacing, radius, elevation, typography }),

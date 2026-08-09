@@ -1,110 +1,111 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+/*
+ * Fogli di stile globali: valgono SOLO sul web (su native l'import è ignorato).
+ *
+ * Non c'è più Tailwind/NativeWind: le direttive `@tailwind` sono state tolte insieme a
+ * NativeWind (vedi babel.config.js). Le variabili qui sotto non servono più a generare
+ * classi — restano perché le regole di questo file le usano, e vanno tenute allineate a
+ * `src/ui/theme/palette.ts`, che è la fonte di verità dei colori.
+ */
 
 /*
- * Variabili colore per NativeWind (uso via className, es. bg-surface, text-primary).
- * ⚠️ Devono restare sincronizzate con `src/ui/theme/palette.ts` (fonte di verità JS).
- * Valori come canali "R G B" così Tailwind può applicare l'alpha (es. bg-primary/10).
+ * Focus da tastiera. react-native-web non disegna nessun indicatore sui `Pressable`:
+ * senza questa regola, chi naviga con il tab non sa dove si trova. `:focus-visible` lo
+ * mostra alla tastiera e non al clic del mouse; le misure sono quelle del token
+ * `focusRing` in `ui/theme/tokens.ts`.
  */
-@layer base {
-  /*
-   * Focus da tastiera (solo web). react-native-web non disegna nessun indicatore sui
-   * `Pressable`: senza questa regola, chi naviga con il tab non sa dove si trova.
-   * `:focus-visible` lo mostra alla tastiera e non al clic del mouse; le misure sono
-   * quelle del token `focusRing` in `ui/theme/tokens.ts`.
-   */
-  :focus-visible {
-    outline: 2px solid rgb(var(--color-primary));
-    outline-offset: 2px;
-  }
+:focus-visible {
+  outline: 2px solid rgb(var(--color-primary));
+  outline-offset: 2px;
+}
 
-  /*
-   * Il ring blu di sistema sui campi di testo non appartiene al design system: sopra la
-   * mappa spiccava come un elemento estraneo. Lo azzeriamo e lasciamo che sia la regola
-   * `:focus-visible` qui sopra a disegnare il focus con il colore d'accento.
-   */
-  input:focus,
-  textarea:focus,
-  select:focus,
-  [contenteditable]:focus {
-    outline: none;
-  }
+/*
+ * Il ring blu di sistema sui campi di testo non appartiene al design system: sopra la
+ * mappa spiccava come un elemento estraneo. Lo azzeriamo e lasciamo che sia la regola
+ * `:focus-visible` qui sopra a disegnare il focus con il colore d'accento.
+ */
+input:focus,
+textarea:focus,
+select:focus,
+[contenteditable]:focus {
+  outline: none;
+}
 
-  /*
-   * Scrollbar discrete (solo web). Quelle di sistema, chiare e spesse, si stampavano
-   * sopra le card delle liste lunghe e rompevano l'illusione della superficie native.
-   */
-  * {
-    scrollbar-width: thin;
-    scrollbar-color: rgb(var(--color-border)) transparent;
-  }
+/*
+ * Scrollbar discrete. Quelle di sistema, chiare e spesse, si stampavano sopra le card
+ * delle liste lunghe e rompevano l'illusione della superficie native.
+ */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: rgb(var(--color-border)) transparent;
+}
 
-  ::-webkit-scrollbar {
-    width: 8px;
-    height: 8px;
-  }
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
 
-  ::-webkit-scrollbar-track {
-    background: transparent;
-  }
+::-webkit-scrollbar-track {
+  background: transparent;
+}
 
-  ::-webkit-scrollbar-thumb {
-    background-color: rgb(var(--color-border));
-    border-radius: 4px;
-  }
+::-webkit-scrollbar-thumb {
+  background-color: rgb(var(--color-border));
+  border-radius: 4px;
+}
 
-  ::-webkit-scrollbar-thumb:hover {
-    background-color: rgb(var(--color-text-tertiary));
-  }
+::-webkit-scrollbar-thumb:hover {
+  background-color: rgb(var(--color-text-tertiary));
+}
 
+:root {
+  --color-background: 247 248 250;
+  --color-surface: 255 255 255;
+  --color-surface-muted: 237 239 243;
+  --color-border: 225 228 234;
+
+  --color-text: 20 22 27;
+  --color-text-secondary: 86 93 107;
+  --color-text-tertiary: 105 112 128;
+
+  --color-primary: 58 49 224;
+  --color-on-primary: 255 255 255;
+  --color-primary-container: 231 229 255;
+  --color-on-primary-container: 36 28 158;
+
+  --color-success: 11 138 75;
+  --color-success-container: 214 242 225;
+  --color-warning: 166 94 0;
+  --color-warning-container: 251 233 200;
+  --color-danger: 192 52 28;
+  --color-danger-container: 250 223 216;
+}
+
+/*
+ * Tema scuro. Senza NativeWind la classe `dark` sulla radice non la mette più nessuno:
+ * qui si segue direttamente la preferenza di sistema, che è ciò che il ThemeProvider fa
+ * per il lato JS.
+ */
+@media (prefers-color-scheme: dark) {
   :root {
-    --color-background: 247 248 250;
-    --color-surface: 255 255 255;
-    --color-surface-muted: 237 239 243;
-    --color-border: 225 228 234;
+    --color-background: 11 12 16;
+    --color-surface: 21 23 30;
+    --color-surface-muted: 31 34 44;
+    --color-border: 43 47 58;
 
-    --color-text: 20 22 27;
-    --color-text-secondary: 86 93 107;
-    --color-text-tertiary: 105 112 128;
+    --color-text: 243 245 248;
+    --color-text-secondary: 166 173 187;
+    --color-text-tertiary: 123 131 148;
 
-    --color-primary: 58 49 224;
-    --color-on-primary: 255 255 255;
-    --color-primary-container: 231 229 255;
-    --color-on-primary-container: 36 28 158;
+    --color-primary: 143 135 255;
+    --color-on-primary: 11 12 16;
+    --color-primary-container: 37 31 99;
+    --color-on-primary-container: 216 212 255;
 
-    --color-success: 11 138 75;
-    --color-success-container: 214 242 225;
-    --color-warning: 166 94 0;
-    --color-warning-container: 251 233 200;
-    --color-danger: 192 52 28;
-    --color-danger-container: 250 223 216;
-  }
-
-  /*
-   * Tema scuro: strategia 'class'. NativeWind applica la classe `dark` alla radice
-   * (anche quando la preferenza è 'system', seguendo l'OS), attivando queste variabili.
-   */
-  .dark:root {
-      --color-background: 11 12 16;
-      --color-surface: 21 23 30;
-      --color-surface-muted: 31 34 44;
-      --color-border: 43 47 58;
-
-      --color-text: 243 245 248;
-      --color-text-secondary: 166 173 187;
-      --color-text-tertiary: 123 131 148;
-
-      --color-primary: 143 135 255;
-      --color-on-primary: 11 12 16;
-      --color-primary-container: 37 31 99;
-      --color-on-primary-container: 216 212 255;
-
-      --color-success: 69 206 134;
-      --color-success-container: 16 51 31;
-      --color-warning: 237 178 76;
-      --color-warning-container: 56 40 8;
-      --color-danger: 255 123 96;
-      --color-danger-container: 58 22 14;
+    --color-success: 69 206 134;
+    --color-success-container: 16 51 31;
+    --color-warning: 237 178 76;
+    --color-warning-container: 56 40 8;
+    --color-danger: 255 123 96;
+    --color-danger-container: 58 22 14;
   }
 }
